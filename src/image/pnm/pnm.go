@@ -8,14 +8,14 @@ import (
 	"strings"
 
 	".."
-	"../../mathex"
+	"../../math"
 )
 
 // Convert a float value in range [0.0, 1.0] to a integer value in range [0, 255],
 // and return as string value.
 // If an input value is out of range, then clamp it.
 func processPixelValue(value float32) string {
-	return strconv.Itoa(int(mathex.Clamp32(mathex.Round32(255.0*value), 0.0, 255.0)))
+	return strconv.Itoa(int(math.Clamp32(math.Round32(255.0*value), 0.0, 255.0)))
 }
 
 func WritePpm(path string, image image.Image) error {

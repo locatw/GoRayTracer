@@ -1,9 +1,9 @@
-package mathex
+package math
 
-import "math"
+import std_math "math"
 
 func Round32(value float32) float32 {
-	return float32(math.Round(float64(value)))
+	return float32(std_math.Round(float64(value)))
 }
 
 func Clamp32(value float32, min float32, max float32) float32 {
@@ -11,5 +11,5 @@ func Clamp32(value float32, min float32, max float32) float32 {
 	min64 := float64(min)
 	max64 := float64(max)
 
-	return float32(math.Min(max64, math.Max(min64, value64)))
+	return float32(std_math.Min(max64, std_math.Max(min64, value64)))
 }

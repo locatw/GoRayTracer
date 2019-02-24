@@ -1,4 +1,4 @@
-package mathex
+package math
 
 import (
 	"testing"
