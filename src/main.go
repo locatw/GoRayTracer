@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	. "./element"
 	"./image/pnm"
 	. "./rendering"
 	. "./vector"

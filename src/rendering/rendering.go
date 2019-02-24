@@ -3,6 +3,7 @@ package rendering
 import (
 	"math"
 
+	. "../element"
 	"../image"
 	. "../vector"
 )
