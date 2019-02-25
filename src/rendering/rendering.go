@@ -13,7 +13,29 @@ type Coordinate struct {
 }
 
 func traceRay(scene Scene, ray Ray) image.Color {
-	return image.CreateDefaultColor(image.White)
+	var minHitInfo *HitInfo = nil
+
+	for _, shape := range scene.Shapes {
+		hitInfo := shape.Intersect(ray)
+
+		if hitInfo == nil {
+			continue
+		}
+
+		if minHitInfo == nil {
+			minHitInfo = hitInfo
+		} else {
+			if hitInfo.T < minHitInfo.T {
+				minHitInfo = hitInfo
+			}
+		}
+	}
+
+	if minHitInfo != nil {
+		return image.CreateDefaultColor(image.White)
+	} else {
+		return image.CreateDefaultColor(image.Black)
+	}
 }
 
 func createPixelRay(camera Camera, width int, height int, coord Coordinate) Ray {
@@ -52,6 +74,11 @@ func createCoordinates(width int, height int) [][]Coordinate {
 	coords := make([][]Coordinate, height)
 	for i := 0; i < height; i++ {
 		coords[i] = make([]Coordinate, width)
+
+		for j := 0; j < width; j++ {
+			coords[i][j].X = j
+			coords[i][j].Y = i
+		}
 	}
 
 	return coords

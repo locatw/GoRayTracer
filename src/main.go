@@ -11,8 +11,8 @@ import (
 )
 
 func main() {
-	width := 4
-	height := 2
+	width := 64
+	height := 64
 
 	camera :=
 		CreateCamera(
@@ -20,7 +20,14 @@ func main() {
 			Vector{X: 0.0, Y: 0.0, Z: -1.0},
 			Vector{X: 0.0, Y: 1.0, Z: 0.0},
 			60.0)
-	scene := Scene{Camera: camera}
+	scene :=
+		Scene{
+			Camera: camera,
+			Shapes: []Shape{
+				&Sphere{Center: Vector{X: 0.0, Y: 0.0, Z: 0.0}, Radius: 1.0},
+			},
+		}
+
 	image := Render(scene, width, height)
 
 	err := pnm.WritePpm("image.ppm", image)
