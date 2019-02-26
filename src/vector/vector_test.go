@@ -142,7 +142,7 @@ func createVecs(count int) []Vector {
 func BenchmarkVectorAddFunc(b *testing.B) {
 	vecs := createVecs(b.N)
 
-	result := Vector{X: 0.0, Y: 0.0, Z: 0.0}
+	result := CreateZeroVector()
 
 	b.ResetTimer()
 
@@ -157,7 +157,7 @@ func BenchmarkVectorAddFunc(b *testing.B) {
 func BenchmarkVectorAddAllFunc(b *testing.B) {
 	vecs := createVecs(b.N)
 
-	result := Vector{X: 0.0, Y: 0.0, Z: 0.0}
+	result := CreateZeroVector()
 
 	b.ResetTimer()
 

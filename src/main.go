@@ -24,7 +24,7 @@ func main() {
 		Scene{
 			Camera: camera,
 			Shapes: []Shape{
-				&Sphere{Center: Vector{X: 0.0, Y: 0.0, Z: 0.0}, Radius: 1.0},
+				&Sphere{Center: CreateZeroVector(), Radius: 1.0},
 			},
 		}
 

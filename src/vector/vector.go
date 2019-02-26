@@ -17,12 +17,16 @@ func (v Vector) String() string {
 	return fmt.Sprintf("Vec(%f, %f, %f)", v.X, v.Y, v.Z)
 }
 
+func CreateZeroVector() Vector {
+	return Vector{X: 0.0, Y: 0.0, Z: 0.0}
+}
+
 func Add(v1 Vector, v2 Vector) Vector {
 	return Vector{X: v1.X + v2.X, Y: v1.Y + v2.Y, Z: v1.Z + v2.Z}
 }
 
 func AddAll(vs ...Vector) Vector {
-	result := Vector{X: 0.0, Y: 0.0, Z: 0.0}
+	result := CreateZeroVector()
 
 	for i := 0; i < len(vs); i++ {
 		result.X += vs[i].X
