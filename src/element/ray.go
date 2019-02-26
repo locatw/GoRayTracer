@@ -15,5 +15,5 @@ type HitInfo struct {
 }
 
 func CreateRay(origin Vector, direction Vector) Ray {
-	return Ray{Origin: origin, Direction: direction.Normalize()}
+	return Ray{Origin: origin, Direction: Normalize(direction)}
 }

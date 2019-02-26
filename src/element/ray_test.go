@@ -9,7 +9,7 @@ import (
 func TestCreateRay(t *testing.T) {
 	origin := Vector{X: 1.0, Y: 2.0, Z: 3.0}
 	dir := Vector{X: 1.0, Y: 1.0, Z: 1.0}
-	expected_dir := dir.Normalize()
+	expected_dir := Normalize(dir)
 
 	ray := CreateRay(origin, dir)
 

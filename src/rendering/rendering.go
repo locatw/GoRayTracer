@@ -41,8 +41,7 @@ func traceRay(scene Scene, ray Ray) image.Color {
 func createPixelRay(camera Camera, width int, height int, coord Coordinate) Ray {
 	aspect := float64(width) / float64(height)
 
-	screen_x_axis := Cross(camera.Direction, camera.Up)
-	screen_x_axis = screen_x_axis.Normalize()
+	screen_x_axis := Normalize(Cross(camera.Direction, camera.Up))
 	screen_y_axis := Multiply(-1.0, camera.Up)
 	screen_height := 2.0 * math.Tan(camera.Fov) / 2.0
 	screen_width := screen_height * aspect

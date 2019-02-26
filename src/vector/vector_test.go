@@ -15,26 +15,6 @@ func TestVectorLength(t *testing.T) {
 	}
 }
 
-func TestVectorNormalize(t *testing.T) {
-	v := Vector{X: 1.0, Y: 4.0, Z: 8.0}
-	v_len := v.Length()
-
-	result := v.Normalize()
-	if result.Length() != 1.0 {
-		t.Errorf("%v.Normalize() must return a Vector which length is 1.0, actual length is %f", v, result.Length())
-	}
-
-	if result.X != v.X/v_len {
-		t.Errorf("X value of %v must %f, actual is %f", result, v.X/v_len, result.X)
-	}
-	if result.Y != v.Y/v_len {
-		t.Errorf("Y value of %v must %f, actual is %f", result, v.Y/v_len, result.Y)
-	}
-	if result.Z != v.Z/v_len {
-		t.Errorf("Z value of %v must %f, actual is %f", result, v.Z/v_len, result.Z)
-	}
-}
-
 func TestVectorAdd(t *testing.T) {
 	v1 := Vector{X: 1.0, Y: 2.0, Z: 3.0}
 	v2 := Vector{X: 10.0, Y: 20.0, Z: 30.0}
@@ -66,6 +46,26 @@ func TestVectorSubtract(t *testing.T) {
 	result := Subtract(v1, v2)
 	if result != expected {
 		t.Errorf("Subtract(%v, %v) must return %v, actual is %v", v1, v2, expected, result)
+	}
+}
+
+func TestVectorNormalize(t *testing.T) {
+	v := Vector{X: 1.0, Y: 4.0, Z: 8.0}
+	v_len := v.Length()
+
+	result := Normalize(v)
+	if result.Length() != 1.0 {
+		t.Errorf("Normalize(%v) must return a Vector which length is 1.0, actual length is %f", v, result.Length())
+	}
+
+	if result.X != v.X/v_len {
+		t.Errorf("X value of %v must %f, actual is %f", result, v.X/v_len, result.X)
+	}
+	if result.Y != v.Y/v_len {
+		t.Errorf("Y value of %v must %f, actual is %f", result, v.Y/v_len, result.Y)
+	}
+	if result.Z != v.Z/v_len {
+		t.Errorf("Z value of %v must %f, actual is %f", result, v.Z/v_len, result.Z)
 	}
 }
 

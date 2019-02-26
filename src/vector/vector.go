@@ -13,11 +13,6 @@ func (v *Vector) Length() float64 {
 	return math.Sqrt(Dot(*v, *v))
 }
 
-func (v *Vector) Normalize() Vector {
-	len := v.Length()
-	return Vector{X: v.X / len, Y: v.Y / len, Z: v.Z / len}
-}
-
 func (v Vector) String() string {
 	return fmt.Sprintf("Vec(%f, %f, %f)", v.X, v.Y, v.Z)
 }
@@ -39,6 +34,11 @@ func AddAll(vs ...Vector) Vector {
 
 func Subtract(v1 Vector, v2 Vector) Vector {
 	return Vector{X: v1.X - v2.X, Y: v1.Y - v2.Y, Z: v1.Z - v2.Z}
+}
+
+func Normalize(v Vector) Vector {
+	len := v.Length()
+	return Vector{X: v.X / len, Y: v.Y / len, Z: v.Z / len}
 }
 
 func Dot(v1 Vector, v2 Vector) float64 {

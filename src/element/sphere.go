@@ -40,8 +40,7 @@ func (sphere *Sphere) Intersect(ray Ray) *HitInfo {
 
 	if intersected {
 		pos := Add(ray.Origin, Multiply(t, ray.Direction))
-		n := Subtract(pos, sphere.Center)
-		n = n.Normalize()
+		n := Normalize(Subtract(pos, sphere.Center))
 
 		return &HitInfo{Object: sphere, Position: pos, Normal: n, T: t}
 	} else {
