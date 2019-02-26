@@ -17,8 +17,8 @@ func main() {
 	camera :=
 		CreateCamera(
 			Vector{X: 0.0, Y: 0.0, Z: 10.0},
-			Vector{X: 0.0, Y: 0.0, Z: -1.0},
-			Vector{X: 0.0, Y: 1.0, Z: 0.0},
+			Multiply(-1.0, CreateAxisVector(ZAxis)),
+			CreateAxisVector(YAxis),
 			60.0)
 	scene :=
 		Scene{

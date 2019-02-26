@@ -8,11 +8,11 @@ import (
 
 func TestCreateCamera(t *testing.T) {
 	origin := Vector{X: 0.0, Y: 0.0, Z: 10.0}
-	dir := Vector{X: 0.0, Y: 0.0, Z: -2.0}
-	up := Vector{X: 0.0, Y: 2.0, Z: 0.0}
+	dir := Multiply(-2.0, CreateAxisVector(ZAxis))
+	up := Multiply(2.0, CreateAxisVector(YAxis))
 	fov := 60.0
-	expected_dir := Vector{X: 0.0, Y: 0.0, Z: -1.0}
-	expected_up := Vector{X: 0.0, Y: 1.0, Z: 0.0}
+	expected_dir := Multiply(-1.0, CreateAxisVector(ZAxis))
+	expected_up := CreateAxisVector(YAxis)
 
 	camera := CreateCamera(origin, dir, up, fov)
 

@@ -5,6 +5,14 @@ import (
 	"math"
 )
 
+type Axis int
+
+const (
+	XAxis Axis = iota
+	YAxis
+	ZAxis
+)
+
 type Vector struct {
 	X, Y, Z float64
 }
@@ -19,6 +27,19 @@ func (v Vector) String() string {
 
 func CreateZeroVector() Vector {
 	return Vector{X: 0.0, Y: 0.0, Z: 0.0}
+}
+
+func CreateAxisVector(axis Axis) Vector {
+	switch axis {
+	case XAxis:
+		return Vector{X: 1.0, Y: 0.0, Z: 0.0}
+	case YAxis:
+		return Vector{X: 0.0, Y: 1.0, Z: 0.0}
+	case ZAxis:
+		return Vector{X: 0.0, Y: 0.0, Z: 1.0}
+	default:
+		panic(fmt.Sprintf("unknown axis: %d", axis))
+	}
 }
 
 func Add(v1 Vector, v2 Vector) Vector {
