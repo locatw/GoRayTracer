@@ -3,6 +3,8 @@ package image
 import (
 	"math"
 	"testing"
+
+	mathex "../math"
 )
 
 func TestDefaultColor_String(t *testing.T) {
@@ -48,5 +50,35 @@ func TestCreateDefaultColor(t *testing.T) {
 				pattern.expected.R, pattern.expected.G, pattern.expected.B,
 				x.R, x.G, x.B)
 		}
+	}
+}
+
+func TestMultiplyColor(t *testing.T) {
+	color1 := Color{R: 0.1, G: 0.2, B: 0.3}
+	color2 := Color{R: 0.01, G: 0.02, B: 0.03}
+	expected := Color{R: 0.001, G: 0.004, B: 0.009}
+
+	result := MultiplyColor(color1, color2)
+
+	epsilon := mathex.Epsilon32()
+	if epsilon < mathex.Abs32(result.R-expected.R) ||
+		epsilon < mathex.Abs32(result.G-expected.G) ||
+		epsilon < mathex.Abs32(result.B-expected.B) {
+		t.Errorf("MultiplyColor(%v, %v) must return %v, actual is %v", color1, color2, expected, result)
+	}
+}
+
+func TestMultiplyScalar(t *testing.T) {
+	scalar := 2.0
+	color := Color{R: 0.1, G: 0.2, B: 0.3}
+	expected := Color{R: 0.2, G: 0.4, B: 0.6}
+
+	result := MultiplyScalar(scalar, color)
+
+	epsilon := mathex.Epsilon32()
+	if epsilon < mathex.Abs32(result.R-expected.R) ||
+		epsilon < mathex.Abs32(result.G-expected.G) ||
+		epsilon < mathex.Abs32(result.B-expected.B) {
+		t.Errorf("MultiplyScalar(%f, %v) must return %v, actual is %v", scalar, color, expected, result)
 	}
 }

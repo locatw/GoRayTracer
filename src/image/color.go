@@ -36,3 +36,12 @@ func CreateDefaultColor(color DefaultColor) Color {
 		panic(fmt.Sprintf("unknown default color : %d", color))
 	}
 }
+
+func MultiplyColor(color1 Color, color2 Color) Color {
+	return Color{R: color1.R * color2.R, G: color1.G * color2.G, B: color1.B * color2.B}
+}
+
+func MultiplyScalar(scalar float64, color Color) Color {
+	a := float32(scalar)
+	return Color{R: a * color.R, G: a * color.G, B: a * color.B}
+}
