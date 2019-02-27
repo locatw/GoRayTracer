@@ -7,6 +7,7 @@ import (
 	. "./element"
 	. "./image"
 	"./image/pnm"
+	mathex "./math"
 	. "./rendering"
 	. "./vector"
 )
@@ -20,7 +21,7 @@ func main() {
 			Vector{X: 50.0, Y: 52.0, Z: 295.6},
 			Vector{X: 0.0, Y: -0.042612, Z: -1.0},
 			CreateAxisVector(YAxis),
-			30.0)
+			mathex.ToRadian(30.0))
 	scene :=
 		Scene{
 			Camera: camera,

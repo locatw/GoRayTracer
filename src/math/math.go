@@ -25,3 +25,7 @@ func Clamp32(value float32, min float32, max float32) float32 {
 
 	return float32(std_math.Min(max64, std_math.Max(min64, value64)))
 }
+
+func ToRadian(x float64) float64 {
+	return x * std_math.Pi / 180.0
+}
