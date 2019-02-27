@@ -7,8 +7,9 @@ import (
 )
 
 type Sphere struct {
-	Center Vector
-	Radius float64
+	Center   Vector
+	Radius   float64
+	Material Material
 }
 
 func (sphere *Sphere) Intersect(ray Ray) *HitInfo {
@@ -46,4 +47,8 @@ func (sphere *Sphere) Intersect(ray Ray) *HitInfo {
 	} else {
 		return nil
 	}
+}
+
+func (sphere *Sphere) GetMaterial() Material {
+	return sphere.Material
 }

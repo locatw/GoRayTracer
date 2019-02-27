@@ -12,6 +12,12 @@ type Coordinate struct {
 	X, Y int
 }
 
+func calculateColor(scene Scene, ray Ray, hitInfo *HitInfo) image.Color {
+	return image.MultiplyScalar(
+		Dot(hitInfo.Normal, Multiply(-1.0, ray.Direction)),
+		hitInfo.Object.GetMaterial().Diffuse)
+}
+
 func traceRay(scene Scene, ray Ray) image.Color {
 	var minHitInfo *HitInfo = nil
 
@@ -32,7 +38,7 @@ func traceRay(scene Scene, ray Ray) image.Color {
 	}
 
 	if minHitInfo != nil {
-		return image.CreateDefaultColor(image.White)
+		return calculateColor(scene, ray, minHitInfo)
 	} else {
 		return image.CreateDefaultColor(image.Black)
 	}

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	. "./element"
+	. "./image"
 	"./image/pnm"
 	. "./rendering"
 	. "./vector"
@@ -24,7 +25,11 @@ func main() {
 		Scene{
 			Camera: camera,
 			Shapes: []Shape{
-				&Sphere{Center: CreateZeroVector(), Radius: 1.0},
+				&Sphere{
+					Center:   CreateZeroVector(),
+					Radius:   1.0,
+					Material: Material{Diffuse: Color{R: 0.75, G: 0.75, B: 0.75}},
+				},
 			},
 		}
 
