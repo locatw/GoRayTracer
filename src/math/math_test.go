@@ -4,6 +4,25 @@ import (
 	"testing"
 )
 
+func TestAbs32(t *testing.T) {
+	patterns := []struct {
+		value    float32
+		expected float32
+	}{
+		{value: 1.0, expected: 1.0},
+		{value: -1.0, expected: 1.0},
+		{value: 0.0, expected: 0.0},
+		{value: 0.0 - Epsilon32(), expected: Epsilon32()},
+	}
+
+	for _, pattern := range patterns {
+		result := Abs32(pattern.value)
+		if result != pattern.expected {
+			t.Errorf("Abs32(%f) must return %f, actual %f", pattern.value, pattern.expected, result)
+		}
+	}
+}
+
 func TestRound32(t *testing.T) {
 	patterns := []struct {
 		value    float32
