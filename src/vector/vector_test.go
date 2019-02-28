@@ -15,6 +15,28 @@ func TestVectorLength(t *testing.T) {
 	}
 }
 
+func TestVectorNearlyEqual(t *testing.T) {
+	patterns := []struct {
+		V1       Vector
+		V2       Vector
+		Expected bool
+	}{
+		{V1: Vector{X: 1.0, Y: 2.0, Z: 3.0}, V2: Vector{X: 1.0, Y: 2.0, Z: 3.0}, Expected: true},
+		{V1: Vector{X: 1.0, Y: 2.0, Z: 3.0}, V2: Vector{X: 1.1, Y: 2.0, Z: 3.0}, Expected: false},
+		{V1: Vector{X: 1.0, Y: 2.0, Z: 3.0}, V2: Vector{X: 1.0, Y: 2.1, Z: 3.0}, Expected: false},
+		{V1: Vector{X: 1.0, Y: 2.0, Z: 3.0}, V2: Vector{X: 1.0, Y: 2.0, Z: 3.1}, Expected: false},
+		{V1: Vector{X: 1.0, Y: 2.0, Z: 3.0}, V2: Vector{X: 1.0, Y: 2.0, Z: 3.0 + epsilon}, Expected: true},
+		{V1: Vector{X: 1.0, Y: 2.0, Z: 3.0}, V2: Vector{X: 1.0, Y: 2.0, Z: 3.0 + 2.0*epsilon}, Expected: false},
+	}
+
+	for _, pattern := range patterns {
+		result := pattern.V1.NearlyEqual(pattern.V2)
+		if result != pattern.Expected {
+			t.Errorf("%v.NearlyEqual(%v) must return %t, actual is %t", pattern.V1, pattern.V2, pattern.Expected, result)
+		}
+	}
+}
+
 func TestVectorAdd(t *testing.T) {
 	v1 := Vector{X: 1.0, Y: 2.0, Z: 3.0}
 	v2 := Vector{X: 10.0, Y: 20.0, Z: 30.0}

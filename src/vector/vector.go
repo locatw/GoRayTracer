@@ -3,6 +3,8 @@ package vector
 import (
 	"fmt"
 	"math"
+
+	mathex "../math"
 )
 
 type Axis int
@@ -13,12 +15,20 @@ const (
 	ZAxis
 )
 
+var epsilon float64 = mathex.Epsilon()
+
 type Vector struct {
 	X, Y, Z float64
 }
 
 func (v *Vector) Length() float64 {
 	return math.Sqrt(Dot(*v, *v))
+}
+
+func (v Vector) NearlyEqual(other Vector) bool {
+	return math.Abs(v.X-other.X) <= epsilon &&
+		math.Abs(v.Y-other.Y) <= epsilon &&
+		math.Abs(v.Z-other.Z) <= epsilon
 }
 
 func (v Vector) String() string {
