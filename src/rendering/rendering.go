@@ -12,20 +12,7 @@ type Coordinate struct {
 	X, Y int
 }
 
-func calculateColor(scene Scene, ray Ray, hitInfo *HitInfo) image.Color {
-	material := hitInfo.Object.GetMaterial()
-
-	emission_color :=
-		image.MultiplyScalar(Dot(Multiply(-1.0, ray.Direction), hitInfo.Normal), material.Emission)
-
-	diffuse_color :=
-		image.MultiplyScalar(
-			Dot(hitInfo.Normal, Multiply(-1.0, ray.Direction)), material.Diffuse)
-
-	return image.AddColorAll(emission_color, diffuse_color)
-}
-
-func traceRay(scene Scene, ray Ray) image.Color {
+func lookForIntersectedObject(scene Scene, ray Ray) *HitInfo {
 	var minHitInfo *HitInfo = nil
 
 	for _, shape := range scene.Shapes {
@@ -44,11 +31,34 @@ func traceRay(scene Scene, ray Ray) image.Color {
 		}
 	}
 
-	if minHitInfo != nil {
-		return calculateColor(scene, ray, minHitInfo)
-	} else {
+	return minHitInfo
+}
+
+func traceRay(scene Scene, ray Ray, depth int) image.Color {
+	if depth <= 0 {
 		return image.CreateDefaultColor(image.Black)
 	}
+
+	hitInfo := lookForIntersectedObject(scene, ray)
+
+	if hitInfo == nil {
+		return image.CreateDefaultColor(image.Black)
+	}
+
+	material := hitInfo.Object.GetMaterial()
+
+	emission_color :=
+		image.MultiplyScalar(Dot(Multiply(-1.0, ray.Direction), hitInfo.Normal), material.Emission)
+
+	diffuse_color :=
+		image.MultiplyScalar(
+			Dot(hitInfo.Normal, Multiply(-1.0, ray.Direction)), material.Diffuse)
+
+	reflect_ray := CreateReflectRay(ray, hitInfo)
+	reflect_color := traceRay(scene, reflect_ray, depth-1)
+	specular_color := image.MultiplyColor(hitInfo.Object.GetMaterial().Specular, reflect_color)
+
+	return image.AddColorAll(emission_color, diffuse_color, specular_color)
 }
 
 func createPixelRay(camera Camera, width int, height int, coord Coordinate) Ray {
@@ -79,7 +89,7 @@ func createPixelRay(camera Camera, width int, height int, coord Coordinate) Ray 
 func renderPixel(scene Scene, width int, height int, coord Coordinate) image.Color {
 	ray := createPixelRay(scene.Camera, width, height, coord)
 
-	return traceRay(scene, ray)
+	return traceRay(scene, ray, 10)
 }
 
 func createCoordinates(width int, height int) [][]Coordinate {

@@ -2,6 +2,10 @@ package math
 
 import std_math "math"
 
+func Epsilon() float64 {
+	return std_math.Nextafter(1.0, 2.0) - 1.0
+}
+
 func Epsilon32() float32 {
 	return std_math.Nextafter32(1.0, 2.0) - 1.0
 }
