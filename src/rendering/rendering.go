@@ -13,9 +13,16 @@ type Coordinate struct {
 }
 
 func calculateColor(scene Scene, ray Ray, hitInfo *HitInfo) image.Color {
-	return image.MultiplyScalar(
-		Dot(hitInfo.Normal, Multiply(-1.0, ray.Direction)),
-		hitInfo.Object.GetMaterial().Diffuse)
+	material := hitInfo.Object.GetMaterial()
+
+	emission_color :=
+		image.MultiplyScalar(Dot(Multiply(-1.0, ray.Direction), hitInfo.Normal), material.Emission)
+
+	diffuse_color :=
+		image.MultiplyScalar(
+			Dot(hitInfo.Normal, Multiply(-1.0, ray.Direction)), material.Diffuse)
+
+	return image.AddColorAll(emission_color, diffuse_color)
 }
 
 func traceRay(scene Scene, ray Ray) image.Color {

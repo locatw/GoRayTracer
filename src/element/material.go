@@ -3,5 +3,6 @@ package element
 import . "../image"
 
 type Material struct {
-	Diffuse Color
+	Emission Color
+	Diffuse  Color
 }

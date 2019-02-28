@@ -37,6 +37,18 @@ func CreateDefaultColor(color DefaultColor) Color {
 	}
 }
 
+func AddColorAll(colors ...Color) Color {
+	result := CreateDefaultColor(Black)
+
+	for i := 0; i < len(colors); i++ {
+		result.R += colors[i].R
+		result.G += colors[i].G
+		result.B += colors[i].B
+	}
+
+	return result
+}
+
 func MultiplyColor(color1 Color, color2 Color) Color {
 	return Color{R: color1.R * color2.R, G: color1.G * color2.G, B: color1.B * color2.B}
 }

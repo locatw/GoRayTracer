@@ -7,6 +7,8 @@ import (
 	mathex "../math"
 )
 
+var epsilon float32 = mathex.Epsilon32()
+
 func TestDefaultColor_String(t *testing.T) {
 	patterns := []struct {
 		color    DefaultColor
@@ -53,6 +55,21 @@ func TestCreateDefaultColor(t *testing.T) {
 	}
 }
 
+func TestAddColorAll(t *testing.T) {
+	color1 := Color{R: 0.1, G: 0.2, B: 0.3}
+	color2 := Color{R: 1.0, G: 2.0, B: 3.0}
+	color3 := Color{R: 10.0, G: 20.0, B: 30.0}
+	expected := Color{R: 11.1, G: 22.2, B: 33.3}
+
+	result := AddColorAll(color1, color2, color3)
+	if epsilon < mathex.Abs32(result.R-expected.R) ||
+		epsilon < mathex.Abs32(result.G-expected.G) ||
+		epsilon < mathex.Abs32(result.B-expected.B) {
+		t.Errorf("AddColorAll(%v, %v, %v) must return %v, actual is %v",
+			color1, color2, color3, expected, result)
+	}
+}
+
 func TestMultiplyColor(t *testing.T) {
 	color1 := Color{R: 0.1, G: 0.2, B: 0.3}
 	color2 := Color{R: 0.01, G: 0.02, B: 0.03}
@@ -60,7 +77,6 @@ func TestMultiplyColor(t *testing.T) {
 
 	result := MultiplyColor(color1, color2)
 
-	epsilon := mathex.Epsilon32()
 	if epsilon < mathex.Abs32(result.R-expected.R) ||
 		epsilon < mathex.Abs32(result.G-expected.G) ||
 		epsilon < mathex.Abs32(result.B-expected.B) {
@@ -75,7 +91,6 @@ func TestMultiplyScalar(t *testing.T) {
 
 	result := MultiplyScalar(scalar, color)
 
-	epsilon := mathex.Epsilon32()
 	if epsilon < mathex.Abs32(result.R-expected.R) ||
 		epsilon < mathex.Abs32(result.G-expected.G) ||
 		epsilon < mathex.Abs32(result.B-expected.B) {
