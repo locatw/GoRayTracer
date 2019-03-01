@@ -97,3 +97,17 @@ func TestMultiplyScalar(t *testing.T) {
 		t.Errorf("MultiplyScalar(%f, %v) must return %v, actual is %v", scalar, color, expected, result)
 	}
 }
+
+func TestDivideScalar(t *testing.T) {
+	scalar := 2.0
+	color := Color{R: 0.2, G: 0.4, B: 0.6}
+	expected := Color{R: 0.1, G: 0.2, B: 0.3}
+
+	result := DivideScalar(color, scalar)
+
+	if epsilon < mathex.Abs32(result.R-expected.R) ||
+		epsilon < mathex.Abs32(result.G-expected.G) ||
+		epsilon < mathex.Abs32(result.B-expected.B) {
+		t.Errorf("DivideScalar(%f, %v) must return %v, actual is %v", scalar, color, expected, result)
+	}
+}

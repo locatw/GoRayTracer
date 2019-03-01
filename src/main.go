@@ -48,7 +48,7 @@ func main() {
 					Center: Vector{X: 50.0, Y: 681.6 - 0.27, Z: 81.6},
 					Radius: 600.0,
 					Material: Material{
-						Emission: MultiplyScalar(12.0, CreateDefaultColor(White)),
+						Emission: MultiplyScalar(1000000.0, CreateDefaultColor(White)),
 						Diffuse:  Color{R: 0.75, G: 0.75, B: 0.75},
 						Specular: CreateDefaultColor(Black),
 					},

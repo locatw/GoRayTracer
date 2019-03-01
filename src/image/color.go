@@ -57,3 +57,8 @@ func MultiplyScalar(scalar float64, color Color) Color {
 	a := float32(scalar)
 	return Color{R: a * color.R, G: a * color.G, B: a * color.B}
 }
+
+func DivideScalar(color Color, scalar float64) Color {
+	a := float32(scalar)
+	return Color{R: color.R / a, G: color.G / a, B: color.B / a}
+}

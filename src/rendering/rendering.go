@@ -12,6 +12,13 @@ type Coordinate struct {
 	X, Y int
 }
 
+func distanceAttenuation(ray Ray, hitInfo *HitInfo, color image.Color) image.Color {
+	v := Subtract(hitInfo.Position, ray.Origin)
+	distance := v.Length()
+
+	return image.DivideScalar(color, 1.0+0.01*math.Pow(distance, 2))
+}
+
 func lookForIntersectedObject(scene Scene, ray Ray) *HitInfo {
 	var minHitInfo *HitInfo = nil
 
@@ -49,14 +56,17 @@ func traceRay(scene Scene, ray Ray, depth int) image.Color {
 
 	emission_color :=
 		image.MultiplyScalar(Dot(Multiply(-1.0, ray.Direction), hitInfo.Normal), material.Emission)
+	emission_color = distanceAttenuation(ray, hitInfo, emission_color)
 
 	diffuse_color :=
 		image.MultiplyScalar(
 			Dot(hitInfo.Normal, Multiply(-1.0, ray.Direction)), material.Diffuse)
+	diffuse_color = distanceAttenuation(ray, hitInfo, diffuse_color)
 
 	reflect_ray := CreateReflectRay(ray, hitInfo)
 	reflect_color := traceRay(scene, reflect_ray, depth-1)
 	specular_color := image.MultiplyColor(hitInfo.Object.GetMaterial().Specular, reflect_color)
+	specular_color = distanceAttenuation(ray, hitInfo, specular_color)
 
 	return image.AddColorAll(emission_color, diffuse_color, specular_color)
 }
