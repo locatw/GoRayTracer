@@ -31,21 +31,27 @@ func main() {
 					Radius: 16.5,
 					Material: Material{
 						Emission: CreateDefaultColor(Black),
-						Diffuse:  Color{R: 0.75, G: 0.75, B: 0.75}},
+						Diffuse:  Color{R: 0.75, G: 0.75, B: 0.75},
+						Specular: Color{R: 0.999, G: 0.999, B: 0.999},
+					},
 				},
 				&Sphere{
 					Center: Vector{X: 73.0, Y: 16.5, Z: 78.0},
 					Radius: 16.5,
 					Material: Material{
 						Emission: CreateDefaultColor(Black),
-						Diffuse:  Color{R: 0.75, G: 0.75, B: 0.75}},
+						Diffuse:  Color{R: 0.75, G: 0.75, B: 0.75},
+						Specular: Color{R: 0.999, G: 0.999, B: 0.999},
+					},
 				},
 				&Sphere{
 					Center: Vector{X: 50.0, Y: 681.6 - 0.27, Z: 81.6},
 					Radius: 600.0,
 					Material: Material{
 						Emission: MultiplyScalar(12.0, CreateDefaultColor(White)),
-						Diffuse:  Color{R: 0.75, G: 0.75, B: 0.75}},
+						Diffuse:  Color{R: 0.75, G: 0.75, B: 0.75},
+						Specular: CreateDefaultColor(Black),
+					},
 				},
 				// top
 				&Plane{
@@ -53,7 +59,9 @@ func main() {
 					Normal: Multiply(-1.0, CreateAxisVector(YAxis)),
 					Material: Material{
 						Emission: CreateDefaultColor(Black),
-						Diffuse:  Color{R: 0.75, G: 0.75, B: 0.75}},
+						Diffuse:  Color{R: 0.75, G: 0.75, B: 0.75},
+						Specular: CreateDefaultColor(Black),
+					},
 				},
 				// bottom
 				&Plane{
@@ -61,7 +69,9 @@ func main() {
 					Normal: CreateAxisVector(YAxis),
 					Material: Material{
 						Emission: CreateDefaultColor(Black),
-						Diffuse:  Color{R: 0.75, G: 0.75, B: 0.75}},
+						Diffuse:  Color{R: 0.75, G: 0.75, B: 0.75},
+						Specular: CreateDefaultColor(Black),
+					},
 				},
 				// left
 				&Plane{
@@ -69,7 +79,9 @@ func main() {
 					Normal: CreateAxisVector(XAxis),
 					Material: Material{
 						Emission: CreateDefaultColor(Black),
-						Diffuse:  Color{R: 0.75, G: 0.75, B: 0.75}},
+						Diffuse:  Color{R: 0.75, G: 0.75, B: 0.75},
+						Specular: CreateDefaultColor(Black),
+					},
 				},
 				// right
 				&Plane{
@@ -77,7 +89,9 @@ func main() {
 					Normal: Multiply(-1.0, CreateAxisVector(XAxis)),
 					Material: Material{
 						Emission: CreateDefaultColor(Black),
-						Diffuse:  Color{R: 0.75, G: 0.75, B: 0.75}},
+						Diffuse:  Color{R: 0.75, G: 0.75, B: 0.75},
+						Specular: CreateDefaultColor(Black),
+					},
 				},
 				// back
 				&Plane{
@@ -85,7 +99,9 @@ func main() {
 					Normal: CreateAxisVector(ZAxis),
 					Material: Material{
 						Emission: CreateDefaultColor(Black),
-						Diffuse:  Color{R: 0.75, G: 0.75, B: 0.75}},
+						Diffuse:  Color{R: 0.75, G: 0.75, B: 0.75},
+						Specular: CreateDefaultColor(Black),
+					},
 				},
 			},
 		}
