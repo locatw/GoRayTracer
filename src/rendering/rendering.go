@@ -58,9 +58,9 @@ func traceRay(scene Scene, ray Ray, depth int) image.Color {
 		image.MultiplyScalar(Dot(Multiply(-1.0, ray.Direction), hitInfo.Normal), material.Emission)
 	emission_color = distanceAttenuation(ray, hitInfo, emission_color)
 
-	diffuse_color :=
-		image.MultiplyScalar(
-			Dot(hitInfo.Normal, Multiply(-1.0, ray.Direction)), material.Diffuse)
+	diffuse_ray := CreateDiffuseRay(ray, hitInfo)
+	diffuse_color := traceRay(scene, diffuse_ray, depth-1)
+	diffuse_color = image.MultiplyColor(material.Diffuse, diffuse_color)
 	diffuse_color = distanceAttenuation(ray, hitInfo, diffuse_color)
 
 	reflect_ray := CreateReflectRay(ray, hitInfo)
