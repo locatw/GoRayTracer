@@ -54,19 +54,28 @@ func traceRay(scene Scene, ray Ray, depth int) image.Color {
 
 	material := hitInfo.Object.GetMaterial()
 
-	emission_color :=
-		image.MultiplyScalar(Dot(Multiply(-1.0, ray.Direction), hitInfo.Normal), material.Emission)
-	emission_color = distanceAttenuation(ray, hitInfo, emission_color)
+	emission_color := image.CreateDefaultColor(image.Black)
+	if !material.Emission.NearlyEqual(emission_color) {
+		emission_color =
+			image.MultiplyScalar(Dot(Multiply(-1.0, ray.Direction), hitInfo.Normal), material.Emission)
+		emission_color = distanceAttenuation(ray, hitInfo, emission_color)
+	}
 
-	diffuse_ray := CreateDiffuseRay(ray, hitInfo)
-	diffuse_color := traceRay(scene, diffuse_ray, depth-1)
-	diffuse_color = image.MultiplyColor(material.Diffuse, diffuse_color)
-	diffuse_color = distanceAttenuation(ray, hitInfo, diffuse_color)
+	diffuse_color := image.CreateDefaultColor(image.Black)
+	if !material.Diffuse.NearlyEqual(diffuse_color) {
+		diffuse_ray := CreateDiffuseRay(ray, hitInfo)
+		diffuse_color := traceRay(scene, diffuse_ray, depth-1)
+		diffuse_color = image.MultiplyColor(material.Diffuse, diffuse_color)
+		diffuse_color = distanceAttenuation(ray, hitInfo, diffuse_color)
+	}
 
-	reflect_ray := CreateReflectRay(ray, hitInfo)
-	reflect_color := traceRay(scene, reflect_ray, depth-1)
-	specular_color := image.MultiplyColor(hitInfo.Object.GetMaterial().Specular, reflect_color)
-	specular_color = distanceAttenuation(ray, hitInfo, specular_color)
+	specular_color := image.CreateDefaultColor(image.Black)
+	if !material.Specular.NearlyEqual(specular_color) {
+		reflect_ray := CreateReflectRay(ray, hitInfo)
+		reflect_color := traceRay(scene, reflect_ray, depth-1)
+		specular_color := image.MultiplyColor(hitInfo.Object.GetMaterial().Specular, reflect_color)
+		specular_color = distanceAttenuation(ray, hitInfo, specular_color)
+	}
 
 	return image.AddColorAll(emission_color, diffuse_color, specular_color)
 }
