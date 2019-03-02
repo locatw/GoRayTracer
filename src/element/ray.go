@@ -38,7 +38,7 @@ func CreateDiffuseRay(ray Ray, hitInfo *HitInfo) Ray {
 	origin := Add(hitInfo.Position, Multiply(10000.0*mathex.Epsilon(), hitInfo.Normal))
 	dir := AddAll(Multiply(x, u), Multiply(y, v), Multiply(z, n))
 
-	return Ray{Origin: origin, Direction: dir}
+	return CreateRay(origin, dir)
 }
 
 func CreateReflectRay(ray Ray, hitInfo *HitInfo) Ray {
@@ -47,5 +47,5 @@ func CreateReflectRay(ray Ray, hitInfo *HitInfo) Ray {
 
 	origin := Add(hitInfo.Position, Multiply(10000.0*mathex.Epsilon(), hitInfo.Normal))
 
-	return Ray{Origin: origin, Direction: dir}
+	return CreateRay(origin, dir)
 }
