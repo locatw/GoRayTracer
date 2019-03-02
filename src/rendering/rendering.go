@@ -3,6 +3,7 @@ package rendering
 import (
 	"fmt"
 	"math"
+	"math/rand"
 	"runtime"
 
 	. "../element"
@@ -87,7 +88,7 @@ func traceRay(scene Scene, ray Ray, depth int) image.Color {
 	return image.AddColorAll(emission_color, diffuse_color, specular_color)
 }
 
-func createPixelRay(camera Camera, width int, height int, coord Coordinate) Ray {
+func createPixelRays(camera Camera, width int, height int, coord Coordinate, sampling_count int) []Ray {
 	aspect := float64(width) / float64(height)
 
 	screen_x_axis := Normalize(Cross(camera.Direction, camera.Up))
@@ -109,13 +110,29 @@ func createPixelRay(camera Camera, width int, height int, coord Coordinate) Ray 
 	pixel_center := Add(left_top_pixel_center, Multiply(float64(coord.X)*pixel_width, screen_x_axis))
 	pixel_center = Add(pixel_center, Multiply(float64(coord.Y)*pixel_height, screen_y_axis))
 
-	return CreateRay(camera.Origin, Subtract(pixel_center, camera.Origin))
+	rays := make([]Ray, sampling_count)
+	for i := 0; i < sampling_count; i++ {
+		x := rand.Float64() - 0.5
+		y := rand.Float64() - 0.5
+
+		sub_pixel_pos := AddAll(pixel_center, Multiply(x*pixel_width, screen_x_axis), Multiply(y*pixel_height, screen_y_axis))
+		rays[i] = CreateRay(camera.Origin, Subtract(sub_pixel_pos, camera.Origin))
+	}
+
+	return rays
 }
 
 func renderPixel(scene Scene, width int, height int, coord Coordinate) image.Color {
-	ray := createPixelRay(scene.Camera, width, height, coord)
+	sampling_count := 10
 
-	return traceRay(scene, ray, 10)
+	pixel_color := image.CreateDefaultColor(image.Black)
+	for _, ray := range createPixelRays(scene.Camera, width, height, coord, sampling_count) {
+		color := traceRay(scene, ray, 10)
+
+		pixel_color = image.AddColor(pixel_color, color)
+	}
+
+	return image.DivideScalar(pixel_color, float64(sampling_count))
 }
 
 func createCoordinates(width int, height int) [][]Coordinate {
@@ -165,6 +182,7 @@ func Render(scene Scene, width int, height int) image.Image {
 	fmt.Printf("NumCPU: %d\n", runtime.NumCPU())
 	fmt.Printf("NumGoroutine: %d\n\n", runtime.NumGoroutine())
 
+	progress_printer := ProgressPrinter{TotalCount: width * height, Interval: 5 * width, Count: 0}
 	finished_pixel_count := 0
 	for {
 		if finished_pixel_count == width*height {
@@ -176,6 +194,8 @@ func Render(scene Scene, width int, height int) image.Image {
 		index := coord_result.Coordinate.Y*img.Width + coord_result.Coordinate.X
 		img.Data[index] = coord_result.Color
 		finished_pixel_count += 1
+
+		progress_printer.Print()
 	}
 
 	close(coord_ch)

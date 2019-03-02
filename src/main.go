@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	. "./element"
 	. "./image"
@@ -106,7 +107,11 @@ func main() {
 			},
 		}
 
+	start_time := time.Now()
 	image := Render(scene, width, height)
+	elapsed := time.Since(start_time)
+
+	fmt.Printf("%0.3f [s]\n", elapsed.Seconds())
 
 	err := pnm.WritePpm("image.ppm", image)
 	if err != nil {

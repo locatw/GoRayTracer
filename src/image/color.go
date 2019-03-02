@@ -49,6 +49,10 @@ func CreateDefaultColor(color DefaultColor) Color {
 	}
 }
 
+func AddColor(color1, color2 Color) Color {
+	return Color{R: color1.R + color2.R, G: color1.G + color2.G, B: color1.B + color2.B}
+}
+
 func AddColorAll(colors ...Color) Color {
 	result := CreateDefaultColor(Black)
 

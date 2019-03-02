@@ -77,6 +77,17 @@ func TestCreateDefaultColor(t *testing.T) {
 	}
 }
 
+func TestColorAdd(t *testing.T) {
+	v1 := Color{R: 1.0, G: 2.0, B: 3.0}
+	v2 := Color{R: 10.0, G: 20.0, B: 30.0}
+	expected := Color{R: 11.0, G: 22.0, B: 33.0}
+
+	result := AddColor(v1, v2)
+	if result != expected {
+		t.Errorf("AddColor(%v, %v) must return %v, actual is %v", v1, v2, expected, result)
+	}
+}
+
 func TestAddColorAll(t *testing.T) {
 	color1 := Color{R: 0.1, G: 0.2, B: 0.3}
 	color2 := Color{R: 1.0, G: 2.0, B: 3.0}
