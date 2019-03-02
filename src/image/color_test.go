@@ -9,6 +9,28 @@ import (
 
 var epsilon float32 = mathex.Epsilon32()
 
+func TestColorNearlyEqual(t *testing.T) {
+	patterns := []struct {
+		Color1   Color
+		Color2   Color
+		Expected bool
+	}{
+		{Color1: Color{R: 0.1, G: 0.2, B: 0.3}, Color2: Color{R: 0.1, G: 0.2, B: 0.3}, Expected: true},
+		{Color1: Color{R: 0.1, G: 0.2, B: 0.3}, Color2: Color{R: 0.11, G: 0.2, B: 0.3}, Expected: false},
+		{Color1: Color{R: 0.1, G: 0.2, B: 0.3}, Color2: Color{R: 0.1, G: 0.21, B: 0.3}, Expected: false},
+		{Color1: Color{R: 0.1, G: 0.2, B: 0.3}, Color2: Color{R: 0.1, G: 0.2, B: 0.31}, Expected: false},
+		{Color1: Color{R: 0.1, G: 0.2, B: 0.3}, Color2: Color{R: 0.1, G: 0.2, B: 0.3 + epsilon}, Expected: true},
+		{Color1: Color{R: 0.1, G: 0.2, B: 0.3}, Color2: Color{R: 0.1, G: 0.2, B: 0.3 + 2.0*epsilon}, Expected: false},
+	}
+
+	for _, pattern := range patterns {
+		result := pattern.Color1.NearlyEqual(pattern.Color2)
+		if result != pattern.Expected {
+			t.Errorf("%v.NearlyEqual(%v) must return %t, actual is %t", pattern.Color1, pattern.Color2, pattern.Expected, result)
+		}
+	}
+}
+
 func TestDefaultColor_String(t *testing.T) {
 	patterns := []struct {
 		color    DefaultColor

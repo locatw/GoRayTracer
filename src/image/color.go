@@ -1,6 +1,10 @@
 package image
 
-import "fmt"
+import (
+	"fmt"
+
+	mathex "../math"
+)
 
 type Color struct {
 	R float32
@@ -10,10 +14,18 @@ type Color struct {
 
 type DefaultColor int
 
+var epsilon32 float32 = mathex.Epsilon32()
+
 const (
 	Black DefaultColor = iota
 	White DefaultColor = iota
 )
+
+func (v Color) NearlyEqual(other Color) bool {
+	return mathex.Abs32(v.R-other.R) <= epsilon32 &&
+		mathex.Abs32(v.G-other.G) <= epsilon32 &&
+		mathex.Abs32(v.B-other.B) <= epsilon32
+}
 
 func (color DefaultColor) String() string {
 	switch color {
