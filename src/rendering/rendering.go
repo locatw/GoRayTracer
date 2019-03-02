@@ -1,7 +1,9 @@
 package rendering
 
 import (
+	"fmt"
 	"math"
+	"runtime"
 
 	. "../element"
 	"../image"
@@ -10,6 +12,11 @@ import (
 
 type Coordinate struct {
 	X, Y int
+}
+
+type RenderPixelResult struct {
+	Coordinate Coordinate
+	Color      image.Color
 }
 
 func distanceAttenuation(ray Ray, hitInfo *HitInfo, color image.Color) image.Color {
@@ -125,15 +132,54 @@ func createCoordinates(width int, height int) [][]Coordinate {
 	return coords
 }
 
+func renderPixelRoutine(coord_ch <-chan Coordinate, result_ch chan<- RenderPixelResult, scene Scene, width int, height int) {
+	for {
+		coord, ok := <-coord_ch
+		if !ok {
+			break
+		}
+
+		pixel_color := renderPixel(scene, width, height, coord)
+
+		result_ch <- RenderPixelResult{Coordinate: coord, Color: pixel_color}
+	}
+}
+
 func Render(scene Scene, width int, height int) image.Image {
 	img := image.CreateImage(width, height)
 	coords := createCoordinates(width, height)
 
+	coord_ch := make(chan Coordinate, width*height)
+	result_ch := make(chan RenderPixelResult, width*height)
+
+	for i := 0; i < runtime.NumCPU(); i++ {
+		go renderPixelRoutine(coord_ch, result_ch, scene, width, height)
+	}
+
 	for h := 0; h < len(coords); h++ {
 		for w := 0; w < len(coords[h]); w++ {
-			img.Data[h*img.Width+w] = renderPixel(scene, width, height, coords[h][w])
+			coord_ch <- coords[h][w]
 		}
 	}
+
+	fmt.Printf("NumCPU: %d\n", runtime.NumCPU())
+	fmt.Printf("NumGoroutine: %d\n\n", runtime.NumGoroutine())
+
+	finished_pixel_count := 0
+	for {
+		if finished_pixel_count == width*height {
+			break
+		}
+
+		coord_result := <-result_ch
+
+		index := coord_result.Coordinate.Y*img.Width + coord_result.Coordinate.X
+		img.Data[index] = coord_result.Color
+		finished_pixel_count += 1
+	}
+
+	close(coord_ch)
+	close(result_ch)
 
 	return img
 }
