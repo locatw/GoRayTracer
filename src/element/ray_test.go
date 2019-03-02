@@ -44,7 +44,7 @@ func TestCreateReflectRay(t *testing.T) {
 		}
 	expected :=
 		Ray{
-			Origin:    Vector{X: 0.0, Y: 100.0 * epsilon, Z: 0.0},
+			Origin:    Vector{X: 0.0, Y: 10000.0 * epsilon, Z: 0.0},
 			Direction: Normalize(Vector{X: 1.0, Y: 1.0, Z: 1.0}),
 		}
 
