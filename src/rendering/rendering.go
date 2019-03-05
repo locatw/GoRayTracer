@@ -27,6 +27,14 @@ func distanceAttenuation(ray Ray, hitInfo *HitInfo, color image.Color) image.Col
 	return image.DivideScalar(color, 1.0+0.01*math.Pow(distance, 2))
 }
 
+func reflectance(ray Ray, normal Vector, n1 float64, n2 float64) float64 {
+	// schilick's approximation
+	cos_theta := Dot(Multiply(-1.0, ray.Direction), normal)
+	r := math.Pow((n1-n2)/(n1+n2), 2.0)
+
+	return r + (1.0-r)*math.Pow(1.0-cos_theta, 5)
+}
+
 func lookForIntersectedObject(scene Scene, ray Ray) *HitInfo {
 	var minHitInfo *HitInfo = nil
 
@@ -77,15 +85,42 @@ func traceRay(scene Scene, ray Ray, depth int) image.Color {
 		diffuse_color = distanceAttenuation(ray, hitInfo, diffuse_color)
 	}
 
+	refraction_color := image.CreateDefaultColor(image.Black)
+	refracted := true
+	if material.IndexOfRefraction != nil {
+		refract_ray, is_total_reflection := CreateRefractRay(ray, hitInfo)
+		if !is_total_reflection {
+			in_object := Dot(Multiply(-1.0, ray.Direction), hitInfo.Normal) < 0.0
+
+			normal := hitInfo.Normal
+			if in_object {
+				normal = Multiply(-1.0, hitInfo.Normal)
+			}
+
+			kr := reflectance(ray, normal, 1.0, *material.IndexOfRefraction)
+
+			if kr < rand.Float64() {
+				refraction_color = traceRay(scene, refract_ray, depth-1)
+				refraction_color = distanceAttenuation(ray, hitInfo, refraction_color)
+			} else {
+				refracted = false
+			}
+		} else {
+			refracted = false
+		}
+	} else {
+		refracted = false
+	}
+
 	specular_color := image.CreateDefaultColor(image.Black)
-	if !material.Specular.NearlyEqual(specular_color) {
+	if !refracted && !material.Specular.NearlyEqual(specular_color) {
 		reflect_ray := CreateReflectRay(ray, hitInfo)
 		specular_color = traceRay(scene, reflect_ray, depth-1)
 		specular_color = image.MultiplyColor(material.Specular, specular_color)
 		specular_color = distanceAttenuation(ray, hitInfo, specular_color)
 	}
 
-	return image.AddColorAll(emission_color, diffuse_color, specular_color)
+	return image.AddColorAll(emission_color, diffuse_color, specular_color, refraction_color)
 }
 
 func createPixelRays(camera Camera, width int, height int, coord Coordinate, sampling_count int) []Ray {

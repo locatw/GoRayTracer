@@ -49,3 +49,36 @@ func CreateReflectRay(ray Ray, hitInfo *HitInfo) Ray {
 
 	return CreateRay(origin, dir)
 }
+
+func CreateRefractRay(ray Ray, hitInfo *HitInfo) (Ray, bool) {
+	if hitInfo.Object.GetMaterial().IndexOfRefraction == nil {
+		panic("cannot create refract ray because object does not have index of refraction.")
+	}
+
+	in_object := Dot(Multiply(-1.0, ray.Direction), hitInfo.Normal) < 0.0
+	iot := *hitInfo.Object.GetMaterial().IndexOfRefraction
+
+	normal := hitInfo.Normal
+	if in_object {
+		normal = Multiply(-1.0, hitInfo.Normal)
+	}
+
+	eta := 1.0 / iot
+	if in_object {
+		eta = iot
+	}
+
+	a := Dot(Multiply(-1.0, ray.Direction), normal)
+	d := 1.0 - math.Pow(eta, 2.0)*(1.0-math.Pow(a, 2.0))
+
+	if 0.0 <= d {
+		dir := Multiply(-eta, Subtract(Multiply(-1.0, ray.Direction), Multiply(a, normal)))
+		dir = Subtract(dir, Multiply(math.Sqrt(d), normal))
+
+		origin := Subtract(hitInfo.Position, Multiply(10000.0*mathex.Epsilon(), normal))
+
+		return CreateRay(origin, dir), false
+	} else {
+		return Ray{}, true
+	}
+}
