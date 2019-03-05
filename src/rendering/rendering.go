@@ -184,6 +184,15 @@ func createCoordinates(width int, height int) [][]Coordinate {
 	return coords
 }
 
+func tone_map(color image.Color) image.Color {
+	e := 1.0 / 2.2
+	return image.Color{
+		R: float32(math.Pow(float64(color.R), e)),
+		G: float32(math.Pow(float64(color.G), e)),
+		B: float32(math.Pow(float64(color.B), e)),
+	}
+}
+
 func renderPixelRoutine(coord_ch <-chan Coordinate, result_ch chan<- RenderPixelResult, scene Scene, width int, height int) {
 	for {
 		coord, ok := <-coord_ch
@@ -192,6 +201,7 @@ func renderPixelRoutine(coord_ch <-chan Coordinate, result_ch chan<- RenderPixel
 		}
 
 		pixel_color := renderPixel(scene, width, height, coord)
+		pixel_color = tone_map(pixel_color)
 
 		result_ch <- RenderPixelResult{Coordinate: coord, Color: pixel_color}
 	}
