@@ -128,7 +128,7 @@ func createPixelRays(camera Camera, width int, height int, coord Coordinate, sam
 
 	screen_x_axis := Normalize(Cross(camera.Direction, camera.Up))
 	screen_y_axis := Multiply(-1.0, camera.Up)
-	screen_height := 2.0 * math.Tan(camera.Fov) / 2.0
+	screen_height := 2.0 * math.Tan(camera.Fov/2.0)
 	screen_width := screen_height * aspect
 
 	screen_center := Add(camera.Origin, camera.Direction)
