@@ -5,6 +5,7 @@ import (
 	"math"
 	"math/rand"
 	"runtime"
+	"time"
 
 	. "../element"
 	"../image"
@@ -208,6 +209,8 @@ func renderPixelRoutine(coord_ch <-chan Coordinate, result_ch chan<- RenderPixel
 }
 
 func Render(scene Scene, width int, height int) image.Image {
+	rand.Seed(time.Now().UnixNano())
+
 	img := image.CreateImage(width, height)
 	coords := createCoordinates(width, height)
 
