@@ -25,6 +25,7 @@ func CreateRay(origin Vector, direction Vector) Ray {
 }
 
 func CreateDiffuseRay(ray Ray, hitInfo *HitInfo) Ray {
+	// base vectors in tangent space
 	u := Normalize(Cross(hitInfo.Normal, ray.Direction))
 	v := Normalize(Cross(u, hitInfo.Normal))
 	n := hitInfo.Normal
