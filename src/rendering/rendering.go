@@ -159,7 +159,7 @@ func createPixelRays(camera Camera, width int, height int, coord Coordinate, sam
 }
 
 func renderPixel(scene Scene, width int, height int, coord Coordinate) image.Color {
-	sampling_count := 10
+	sampling_count := 1000
 
 	pixel_color := image.CreateDefaultColor(image.Black)
 	for _, ray := range createPixelRays(scene.Camera, width, height, coord, sampling_count) {
