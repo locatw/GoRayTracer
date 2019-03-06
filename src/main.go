@@ -35,7 +35,7 @@ func main() {
 					Radius: 16.5,
 					Material: Material{
 						Emission:          CreateDefaultColor(Black),
-						Diffuse:           Color{R: 0.75, G: 0.75, B: 0.75},
+						Diffuse:           CreateDefaultColor(Black),
 						Specular:          Color{R: 0.999, G: 0.999, B: 0.999},
 						IndexOfRefraction: nil,
 					},
@@ -45,7 +45,7 @@ func main() {
 					Radius: 16.5,
 					Material: Material{
 						Emission:          CreateDefaultColor(Black),
-						Diffuse:           Color{R: 0.75, G: 0.75, B: 0.75},
+						Diffuse:           CreateDefaultColor(Black),
 						Specular:          Color{R: 0.999, G: 0.999, B: 0.999},
 						IndexOfRefraction: ior,
 					},
