@@ -12,15 +12,6 @@ import (
 	. "github.com/locatw/go-ray-tracer/vector"
 )
 
-type Coordinate struct {
-	X, Y int
-}
-
-type RenderPixelResult struct {
-	Coordinate Coordinate
-	Color      image.Color
-}
-
 func distanceAttenuation(ray Ray, hitInfo *HitInfo, color image.Color) image.Color {
 	v := Subtract(hitInfo.Position, ray.Origin)
 	distance := v.Length()
@@ -102,7 +93,7 @@ func traceRay(scene Scene, ray Ray, depth int) image.Color {
 	return image.AddColorAll(emissionColor, diffuseColor, specularColor, refractionColor)
 }
 
-func createPixelRays(camera Camera, width int, height int, coord Coordinate, samplingCount int) []Ray {
+func createPixelRays(camera Camera, width int, height int, coord image.Coordinate, samplingCount int) []Ray {
 	aspect := float64(width) / float64(height)
 
 	screenXAxis := Normalize(Cross(camera.Direction, camera.Up))
@@ -136,31 +127,17 @@ func createPixelRays(camera Camera, width int, height int, coord Coordinate, sam
 	return rays
 }
 
-func renderPixel(scene Scene, width int, height int, coord Coordinate) image.Color {
+func renderPixel(scene Scene, width int, height int, pixel *image.Pixel) {
 	samplingCount := 1000
 
 	pixelColor := image.CreateDefaultColor(image.Black)
-	for _, ray := range createPixelRays(scene.Camera, width, height, coord, samplingCount) {
+	for _, ray := range createPixelRays(scene.Camera, width, height, pixel.Coordinate, samplingCount) {
 		color := traceRay(scene, ray, 10)
 
 		pixelColor = image.AddColor(pixelColor, color)
 	}
 
-	return image.DivideScalar(pixelColor, float64(samplingCount))
-}
-
-func createCoordinates(width int, height int) [][]Coordinate {
-	coords := make([][]Coordinate, height)
-	for i := 0; i < height; i++ {
-		coords[i] = make([]Coordinate, width)
-
-		for j := 0; j < width; j++ {
-			coords[i][j].X = j
-			coords[i][j].Y = i
-		}
-	}
-
-	return coords
+	pixel.Color = toneMap(image.DivideScalar(pixelColor, float64(samplingCount)))
 }
 
 func toneMap(color image.Color) image.Color {
@@ -172,17 +149,16 @@ func toneMap(color image.Color) image.Color {
 	}
 }
 
-func renderPixelRoutine(coordCh <-chan Coordinate, resultCh chan<- RenderPixelResult, scene Scene, width int, height int) {
+func renderPixelRoutine(pixelCh <-chan *image.Pixel, resultCh chan<- *image.Pixel, scene Scene, width int, height int) {
 	for {
-		coord, ok := <-coordCh
+		pixel, ok := <-pixelCh
 		if !ok {
 			break
 		}
 
-		pixelColor := renderPixel(scene, width, height, coord)
-		pixelColor = toneMap(pixelColor)
+		renderPixel(scene, width, height, pixel)
 
-		resultCh <- RenderPixelResult{Coordinate: coord, Color: pixelColor}
+		resultCh <- pixel
 	}
 }
 
@@ -190,19 +166,16 @@ func Render(scene Scene, width int, height int) image.Image {
 	rand.Seed(time.Now().UnixNano())
 
 	img := image.CreateImage(width, height)
-	coords := createCoordinates(width, height)
 
-	coordCh := make(chan Coordinate, width*height)
-	resultCh := make(chan RenderPixelResult, width*height)
+	pixelCh := make(chan *image.Pixel, width*height)
+	resultCh := make(chan *image.Pixel, width*height)
 
 	for i := 0; i < runtime.NumCPU(); i++ {
-		go renderPixelRoutine(coordCh, resultCh, scene, width, height)
+		go renderPixelRoutine(pixelCh, resultCh, scene, width, height)
 	}
 
-	for h := 0; h < len(coords); h++ {
-		for w := 0; w < len(coords[h]); w++ {
-			coordCh <- coords[h][w]
-		}
+	for i := 0; i < len(img.Pixels); i++ {
+		pixelCh <- &img.Pixels[i]
 	}
 
 	fmt.Printf("NumCPU: %d\n", runtime.NumCPU())
@@ -215,20 +188,14 @@ func Render(scene Scene, width int, height int) image.Image {
 			break
 		}
 
-		coordResult := <-resultCh
+		<-resultCh
 
-		index := coordResult.Coordinate.Y*img.Width + coordResult.Coordinate.X
-		img.Pixels[index] = image.Pixel{
-			X:     coordResult.Coordinate.X,
-			Y:     coordResult.Coordinate.Y,
-			Color: coordResult.Color,
-		}
 		finishedPixelCount++
 
 		progressPrinter.Print()
 	}
 
-	close(coordCh)
+	close(pixelCh)
 	close(resultCh)
 
 	return img

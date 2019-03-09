@@ -11,12 +11,12 @@ import (
 
 func TestWritePpm(t *testing.T) {
 	img := image.CreateImage(3, 2)
-	img.Pixels[0] = image.Pixel{X: 0, Y: 0, Color: image.Color{R: 1.0, G: 0.0, B: 0.0}}
-	img.Pixels[1] = image.Pixel{X: 1, Y: 0, Color: image.Color{R: 0.0, G: 1.0, B: 0.0}}
-	img.Pixels[2] = image.Pixel{X: 2, Y: 0, Color: image.Color{R: 0.0, G: 0.0, B: 1.0}}
-	img.Pixels[3] = image.Pixel{X: 0, Y: 1, Color: image.Color{R: 1.0, G: 1.0, B: 0.0}}
-	img.Pixels[4] = image.Pixel{X: 1, Y: 1, Color: image.Color{R: 0.0, G: 1.0, B: 1.0}}
-	img.Pixels[5] = image.Pixel{X: 2, Y: 1, Color: image.Color{R: 1.0, G: 0.0, B: 1.0}}
+	img.Pixels[0] = image.Pixel{Coordinate: image.Coordinate{X: 0, Y: 0}, Color: image.Color{R: 1.0, G: 0.0, B: 0.0}}
+	img.Pixels[1] = image.Pixel{Coordinate: image.Coordinate{X: 1, Y: 0}, Color: image.Color{R: 0.0, G: 1.0, B: 0.0}}
+	img.Pixels[2] = image.Pixel{Coordinate: image.Coordinate{X: 2, Y: 0}, Color: image.Color{R: 0.0, G: 0.0, B: 1.0}}
+	img.Pixels[3] = image.Pixel{Coordinate: image.Coordinate{X: 0, Y: 1}, Color: image.Color{R: 1.0, G: 1.0, B: 0.0}}
+	img.Pixels[4] = image.Pixel{Coordinate: image.Coordinate{X: 1, Y: 1}, Color: image.Color{R: 0.0, G: 1.0, B: 1.0}}
+	img.Pixels[5] = image.Pixel{Coordinate: image.Coordinate{X: 2, Y: 1}, Color: image.Color{R: 1.0, G: 0.0, B: 1.0}}
 
 	file, err := ioutil.TempFile(os.TempDir(), "image.ppm")
 	if err != nil {

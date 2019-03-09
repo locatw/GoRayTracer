@@ -1,9 +1,12 @@
 package image
 
+type Coordinate struct {
+	X, Y int
+}
+
 type Pixel struct {
-	X     int
-	Y     int
-	Color Color
+	Coordinate Coordinate
+	Color      Color
 }
 
 type Image struct {
@@ -19,7 +22,7 @@ func CreateImage(width int, height int) Image {
 
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
-			pixels[y*width+x] = Pixel{X: x, Y: y, Color: black}
+			pixels[y*width+x] = Pixel{Coordinate: Coordinate{X: x, Y: y}, Color: black}
 		}
 	}
 
