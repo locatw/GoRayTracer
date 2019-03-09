@@ -118,7 +118,13 @@ func main() {
 				},
 			},
 		}
-	rayTracer := RayTracer{Scene: scene}
+	rayTracer := RayTracer{
+		Scene: scene,
+		RenderingSetting: RenderingSetting{
+			SamplingCount:              1000,
+			DistanceAttenuationEnabled: true,
+		},
+	}
 
 	startTime := time.Now()
 	image := rayTracer.Render()

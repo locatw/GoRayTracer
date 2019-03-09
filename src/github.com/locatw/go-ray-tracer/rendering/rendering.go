@@ -13,7 +13,13 @@ import (
 )
 
 type RayTracer struct {
-	Scene Scene
+	Scene            Scene
+	RenderingSetting RenderingSetting
+}
+
+type RenderingSetting struct {
+	SamplingCount              int
+	DistanceAttenuationEnabled bool
 }
 
 func (rayTracer *RayTracer) Render() image.Image {
@@ -77,16 +83,16 @@ func (rayTracer *RayTracer) renderPixelRoutine(pixelCh <-chan *image.Pixel, resu
 
 func (rayTracer *RayTracer) renderPixel(pixel *image.Pixel) {
 	camera := rayTracer.Scene.Camera
-	samplingCount := 1000
+	setting := rayTracer.RenderingSetting
 
 	pixelColor := image.CreateDefaultColor(image.Black)
-	for _, ray := range camera.CreatePixelRays(pixel.Coordinate.X, pixel.Coordinate.Y, samplingCount) {
+	for _, ray := range camera.CreatePixelRays(pixel.Coordinate.X, pixel.Coordinate.Y, setting.SamplingCount) {
 		color := rayTracer.traceRay(ray, 10)
 
 		pixelColor = image.AddColor(pixelColor, color)
 	}
 
-	pixel.Color = toneMap(image.DivideScalar(pixelColor, float64(samplingCount)))
+	pixel.Color = toneMap(image.DivideScalar(pixelColor, float64(setting.SamplingCount)))
 }
 
 func (rayTracer *RayTracer) traceRay(ray Ray, depth int) image.Color {
@@ -156,10 +162,14 @@ func (rayTracer *RayTracer) traceRay(ray Ray, depth int) image.Color {
 }
 
 func (rayTracer *RayTracer) distanceAttenuation(ray Ray, hitInfo *HitInfo, color image.Color) image.Color {
-	v := Subtract(hitInfo.Position, ray.Origin)
-	distance := v.Length()
+	if rayTracer.RenderingSetting.DistanceAttenuationEnabled {
+		v := Subtract(hitInfo.Position, ray.Origin)
+		distance := v.Length()
 
-	return image.DivideScalar(color, 1.0+0.01*math.Pow(distance, 2))
+		return image.DivideScalar(color, 1.0+0.01*math.Pow(distance, 2))
+	} else {
+		return color
+	}
 }
 
 func (rayTracer *RayTracer) reflectance(ray Ray, normal Vector, n1 float64, n2 float64) float64 {
