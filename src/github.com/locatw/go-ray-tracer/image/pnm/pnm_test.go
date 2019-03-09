@@ -30,27 +30,27 @@ func TestWritePpm(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	result_file, err := os.Open(file.Name())
+	resultFile, err := os.Open(file.Name())
 	if err != nil {
 		t.Errorf(err.Error())
 	}
 
-	defer result_file.Close()
+	defer resultFile.Close()
 
-	scanner := bufio.NewScanner(result_file)
+	scanner := bufio.NewScanner(resultFile)
 	lines := make([]string, 0)
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
 
-	expected_lines := []string{
+	expectedLines := []string{
 		"P3",
 		"3 2",
 		"255",
 		"255 0 0 0 255 0 0 0 255",
 		"255 255 0 0 255 255 255 0 255",
 	}
-	for i, expected := range expected_lines {
+	for i, expected := range expectedLines {
 		if lines[i] != expected {
 			t.Errorf("line %d must be \"%s\", actual is %s", i+1, expected, lines[i])
 		}

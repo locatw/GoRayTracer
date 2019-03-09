@@ -12,7 +12,7 @@ var epsilon float64 = mathex.Epsilon()
 func TestCreateRay(t *testing.T) {
 	origin := Vector{X: 1.0, Y: 2.0, Z: 3.0}
 	dir := Vector{X: 1.0, Y: 1.0, Z: 1.0}
-	expected_dir := Normalize(dir)
+	expectedDir := Normalize(dir)
 
 	ray := CreateRay(origin, dir)
 
@@ -21,14 +21,14 @@ func TestCreateRay(t *testing.T) {
 			origin, dir, origin, ray.Origin)
 	}
 
-	if ray.Direction != expected_dir {
+	if ray.Direction != expectedDir {
 		t.Errorf("CreateRay(%v, %v) must return ray which direction is normalized, actual direction is %v",
 			origin, dir, ray.Direction)
 	}
 }
 
 func TestCreateReflectRay(t *testing.T) {
-	in_ray := CreateRay(Vector{X: -1.0, Y: 1.0, Z: -1.0}, Vector{X: 1.0, Y: -1.0, Z: 1.0})
+	inRay := CreateRay(Vector{X: -1.0, Y: 1.0, Z: -1.0}, Vector{X: 1.0, Y: -1.0, Z: 1.0})
 	plane :=
 		Plane{
 			Center:   CreateZeroVector(),
@@ -48,15 +48,15 @@ func TestCreateReflectRay(t *testing.T) {
 			Direction: Normalize(Vector{X: 1.0, Y: 1.0, Z: 1.0}),
 		}
 
-	reflected_ray := CreateReflectRay(in_ray, &hitInfo)
+	reflectedRay := CreateReflectRay(inRay, &hitInfo)
 
-	if !reflected_ray.Origin.NearlyEqual(expected.Origin) {
+	if !reflectedRay.Origin.NearlyEqual(expected.Origin) {
 		t.Errorf("CreateReflectRay(%v, %v) must return reflected ray which origin is %v, actual origin is %v",
-			in_ray, hitInfo, expected.Origin, reflected_ray.Origin)
+			inRay, hitInfo, expected.Origin, reflectedRay.Origin)
 	}
 
-	if !reflected_ray.Direction.NearlyEqual(expected.Direction) {
+	if !reflectedRay.Direction.NearlyEqual(expected.Direction) {
 		t.Errorf("CreateReflectRay(%v, %v) must return reflected ray which direction is %v, actual direction is %v",
-			in_ray, hitInfo, expected.Direction, reflected_ray.Direction)
+			inRay, hitInfo, expected.Direction, reflectedRay.Direction)
 	}
 }

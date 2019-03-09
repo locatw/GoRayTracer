@@ -56,16 +56,16 @@ func CreateRefractRay(ray Ray, hitInfo *HitInfo) (Ray, bool) {
 		panic("cannot create refract ray because object does not have index of refraction.")
 	}
 
-	in_object := Dot(Multiply(-1.0, ray.Direction), hitInfo.Normal) < 0.0
+	inObject := Dot(Multiply(-1.0, ray.Direction), hitInfo.Normal) < 0.0
 	iot := *hitInfo.Object.GetMaterial().IndexOfRefraction
 
 	normal := hitInfo.Normal
-	if in_object {
+	if inObject {
 		normal = Multiply(-1.0, hitInfo.Normal)
 	}
 
 	eta := 1.0 / iot
-	if in_object {
+	if inObject {
 		eta = iot
 	}
 

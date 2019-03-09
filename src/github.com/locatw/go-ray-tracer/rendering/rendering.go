@@ -30,10 +30,10 @@ func distanceAttenuation(ray Ray, hitInfo *HitInfo, color image.Color) image.Col
 
 func reflectance(ray Ray, normal Vector, n1 float64, n2 float64) float64 {
 	// schilick's approximation
-	cos_theta := Dot(Multiply(-1.0, ray.Direction), normal)
+	cosTheta := Dot(Multiply(-1.0, ray.Direction), normal)
 	r := math.Pow((n1-n2)/(n1+n2), 2.0)
 
-	return r + (1.0-r)*math.Pow(1.0-cos_theta, 5)
+	return r + (1.0-r)*math.Pow(1.0-cosTheta, 5)
 }
 
 func lookForIntersectedObject(scene Scene, ray Ray) *HitInfo {
@@ -71,38 +71,38 @@ func traceRay(scene Scene, ray Ray, depth int) image.Color {
 
 	material := hitInfo.Object.GetMaterial()
 
-	emission_color := image.CreateDefaultColor(image.Black)
-	if !material.Emission.NearlyEqual(emission_color) {
-		emission_color =
+	emissionColor := image.CreateDefaultColor(image.Black)
+	if !material.Emission.NearlyEqual(emissionColor) {
+		emissionColor =
 			image.MultiplyScalar(Dot(Multiply(-1.0, ray.Direction), hitInfo.Normal), material.Emission)
-		emission_color = distanceAttenuation(ray, hitInfo, emission_color)
+		emissionColor = distanceAttenuation(ray, hitInfo, emissionColor)
 	}
 
-	diffuse_color := image.CreateDefaultColor(image.Black)
-	if !material.Diffuse.NearlyEqual(diffuse_color) {
-		diffuse_ray := CreateDiffuseRay(ray, hitInfo)
-		diffuse_color = traceRay(scene, diffuse_ray, depth-1)
-		diffuse_color = image.MultiplyColor(material.Diffuse, diffuse_color)
-		diffuse_color = distanceAttenuation(ray, hitInfo, diffuse_color)
+	diffuseColor := image.CreateDefaultColor(image.Black)
+	if !material.Diffuse.NearlyEqual(diffuseColor) {
+		diffuseRay := CreateDiffuseRay(ray, hitInfo)
+		diffuseColor = traceRay(scene, diffuseRay, depth-1)
+		diffuseColor = image.MultiplyColor(material.Diffuse, diffuseColor)
+		diffuseColor = distanceAttenuation(ray, hitInfo, diffuseColor)
 	}
 
-	refraction_color := image.CreateDefaultColor(image.Black)
+	refractionColor := image.CreateDefaultColor(image.Black)
 	refracted := true
 	if material.IndexOfRefraction != nil {
-		refract_ray, is_total_reflection := CreateRefractRay(ray, hitInfo)
-		if !is_total_reflection {
-			in_object := Dot(Multiply(-1.0, ray.Direction), hitInfo.Normal) < 0.0
+		refractRay, isTotalReflection := CreateRefractRay(ray, hitInfo)
+		if !isTotalReflection {
+			inObject := Dot(Multiply(-1.0, ray.Direction), hitInfo.Normal) < 0.0
 
 			normal := hitInfo.Normal
-			if in_object {
+			if inObject {
 				normal = Multiply(-1.0, hitInfo.Normal)
 			}
 
 			kr := reflectance(ray, normal, 1.0, *material.IndexOfRefraction)
 
 			if kr < rand.Float64() {
-				refraction_color = traceRay(scene, refract_ray, depth-1)
-				refraction_color = distanceAttenuation(ray, hitInfo, refraction_color)
+				refractionColor = traceRay(scene, refractRay, depth-1)
+				refractionColor = distanceAttenuation(ray, hitInfo, refractionColor)
 			} else {
 				refracted = false
 			}
@@ -113,62 +113,62 @@ func traceRay(scene Scene, ray Ray, depth int) image.Color {
 		refracted = false
 	}
 
-	specular_color := image.CreateDefaultColor(image.Black)
-	if !refracted && !material.Specular.NearlyEqual(specular_color) {
-		reflect_ray := CreateReflectRay(ray, hitInfo)
-		specular_color = traceRay(scene, reflect_ray, depth-1)
-		specular_color = image.MultiplyColor(material.Specular, specular_color)
-		specular_color = distanceAttenuation(ray, hitInfo, specular_color)
+	specularColor := image.CreateDefaultColor(image.Black)
+	if !refracted && !material.Specular.NearlyEqual(specularColor) {
+		reflectRay := CreateReflectRay(ray, hitInfo)
+		specularColor = traceRay(scene, reflectRay, depth-1)
+		specularColor = image.MultiplyColor(material.Specular, specularColor)
+		specularColor = distanceAttenuation(ray, hitInfo, specularColor)
 	}
 
-	return image.AddColorAll(emission_color, diffuse_color, specular_color, refraction_color)
+	return image.AddColorAll(emissionColor, diffuseColor, specularColor, refractionColor)
 }
 
-func createPixelRays(camera Camera, width int, height int, coord Coordinate, sampling_count int) []Ray {
+func createPixelRays(camera Camera, width int, height int, coord Coordinate, samplingCount int) []Ray {
 	aspect := float64(width) / float64(height)
 
-	screen_x_axis := Normalize(Cross(camera.Direction, camera.Up))
-	screen_y_axis := Multiply(-1.0, camera.Up)
-	screen_height := 2.0 * math.Tan(camera.Fov/2.0)
-	screen_width := screen_height * aspect
+	screenXAxis := Normalize(Cross(camera.Direction, camera.Up))
+	screenYAxis := Multiply(-1.0, camera.Up)
+	screenHeight := 2.0 * math.Tan(camera.Fov/2.0)
+	screenWidth := screenHeight * aspect
 
-	screen_center := Add(camera.Origin, camera.Direction)
+	screenCenter := Add(camera.Origin, camera.Direction)
 
-	pixel_width := screen_width / float64(width)
-	pixel_height := screen_height / float64(height)
-	offset := Multiply(pixel_width/2.0, screen_x_axis)
-	offset = Add(offset, Multiply(pixel_height/2.0, screen_y_axis))
+	pixelWidth := screenWidth / float64(width)
+	pixelHeight := screenHeight / float64(height)
+	offset := Multiply(pixelWidth/2.0, screenXAxis)
+	offset = Add(offset, Multiply(pixelHeight/2.0, screenYAxis))
 
-	left_top_pixel_center := Subtract(screen_center, Multiply(screen_width/2.0, screen_x_axis))
-	left_top_pixel_center = Subtract(left_top_pixel_center, Multiply(screen_height/2.0, screen_y_axis))
-	left_top_pixel_center = Add(left_top_pixel_center, offset)
+	leftTopPixelCenter := Subtract(screenCenter, Multiply(screenWidth/2.0, screenXAxis))
+	leftTopPixelCenter = Subtract(leftTopPixelCenter, Multiply(screenHeight/2.0, screenYAxis))
+	leftTopPixelCenter = Add(leftTopPixelCenter, offset)
 
-	pixel_center := Add(left_top_pixel_center, Multiply(float64(coord.X)*pixel_width, screen_x_axis))
-	pixel_center = Add(pixel_center, Multiply(float64(coord.Y)*pixel_height, screen_y_axis))
+	pixelCenter := Add(leftTopPixelCenter, Multiply(float64(coord.X)*pixelWidth, screenXAxis))
+	pixelCenter = Add(pixelCenter, Multiply(float64(coord.Y)*pixelHeight, screenYAxis))
 
-	rays := make([]Ray, sampling_count)
-	for i := 0; i < sampling_count; i++ {
+	rays := make([]Ray, samplingCount)
+	for i := 0; i < samplingCount; i++ {
 		x := rand.Float64() - 0.5
 		y := rand.Float64() - 0.5
 
-		sub_pixel_pos := AddAll(pixel_center, Multiply(x*pixel_width, screen_x_axis), Multiply(y*pixel_height, screen_y_axis))
-		rays[i] = CreateRay(camera.Origin, Subtract(sub_pixel_pos, camera.Origin))
+		subPixelPos := AddAll(pixelCenter, Multiply(x*pixelWidth, screenXAxis), Multiply(y*pixelHeight, screenYAxis))
+		rays[i] = CreateRay(camera.Origin, Subtract(subPixelPos, camera.Origin))
 	}
 
 	return rays
 }
 
 func renderPixel(scene Scene, width int, height int, coord Coordinate) image.Color {
-	sampling_count := 1000
+	samplingCount := 1000
 
-	pixel_color := image.CreateDefaultColor(image.Black)
-	for _, ray := range createPixelRays(scene.Camera, width, height, coord, sampling_count) {
+	pixelColor := image.CreateDefaultColor(image.Black)
+	for _, ray := range createPixelRays(scene.Camera, width, height, coord, samplingCount) {
 		color := traceRay(scene, ray, 10)
 
-		pixel_color = image.AddColor(pixel_color, color)
+		pixelColor = image.AddColor(pixelColor, color)
 	}
 
-	return image.DivideScalar(pixel_color, float64(sampling_count))
+	return image.DivideScalar(pixelColor, float64(samplingCount))
 }
 
 func createCoordinates(width int, height int) [][]Coordinate {
@@ -185,7 +185,7 @@ func createCoordinates(width int, height int) [][]Coordinate {
 	return coords
 }
 
-func tone_map(color image.Color) image.Color {
+func toneMap(color image.Color) image.Color {
 	e := 1.0 / 2.2
 	return image.Color{
 		R: float32(math.Pow(float64(color.R), e)),
@@ -194,17 +194,17 @@ func tone_map(color image.Color) image.Color {
 	}
 }
 
-func renderPixelRoutine(coord_ch <-chan Coordinate, result_ch chan<- RenderPixelResult, scene Scene, width int, height int) {
+func renderPixelRoutine(coordCh <-chan Coordinate, resultCh chan<- RenderPixelResult, scene Scene, width int, height int) {
 	for {
-		coord, ok := <-coord_ch
+		coord, ok := <-coordCh
 		if !ok {
 			break
 		}
 
-		pixel_color := renderPixel(scene, width, height, coord)
-		pixel_color = tone_map(pixel_color)
+		pixelColor := renderPixel(scene, width, height, coord)
+		pixelColor = toneMap(pixelColor)
 
-		result_ch <- RenderPixelResult{Coordinate: coord, Color: pixel_color}
+		resultCh <- RenderPixelResult{Coordinate: coord, Color: pixelColor}
 	}
 }
 
@@ -214,40 +214,40 @@ func Render(scene Scene, width int, height int) image.Image {
 	img := image.CreateImage(width, height)
 	coords := createCoordinates(width, height)
 
-	coord_ch := make(chan Coordinate, width*height)
-	result_ch := make(chan RenderPixelResult, width*height)
+	coordCh := make(chan Coordinate, width*height)
+	resultCh := make(chan RenderPixelResult, width*height)
 
 	for i := 0; i < runtime.NumCPU(); i++ {
-		go renderPixelRoutine(coord_ch, result_ch, scene, width, height)
+		go renderPixelRoutine(coordCh, resultCh, scene, width, height)
 	}
 
 	for h := 0; h < len(coords); h++ {
 		for w := 0; w < len(coords[h]); w++ {
-			coord_ch <- coords[h][w]
+			coordCh <- coords[h][w]
 		}
 	}
 
 	fmt.Printf("NumCPU: %d\n", runtime.NumCPU())
 	fmt.Printf("NumGoroutine: %d\n\n", runtime.NumGoroutine())
 
-	progress_printer := ProgressPrinter{TotalCount: width * height, Interval: 5 * width, Count: 0}
-	finished_pixel_count := 0
+	progressPrinter := ProgressPrinter{TotalCount: width * height, Interval: 5 * width, Count: 0}
+	finishedPixelCount := 0
 	for {
-		if finished_pixel_count == width*height {
+		if finishedPixelCount == width*height {
 			break
 		}
 
-		coord_result := <-result_ch
+		coordResult := <-resultCh
 
-		index := coord_result.Coordinate.Y*img.Width + coord_result.Coordinate.X
-		img.Data[index] = coord_result.Color
-		finished_pixel_count += 1
+		index := coordResult.Coordinate.Y*img.Width + coordResult.Coordinate.X
+		img.Data[index] = coordResult.Color
+		finishedPixelCount += 1
 
-		progress_printer.Print()
+		progressPrinter.Print()
 	}
 
-	close(coord_ch)
-	close(result_ch)
+	close(coordCh)
+	close(resultCh)
 
 	return img
 }

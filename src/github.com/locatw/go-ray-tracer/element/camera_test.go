@@ -11,8 +11,8 @@ func TestCreateCamera(t *testing.T) {
 	dir := Multiply(-2.0, CreateAxisVector(ZAxis))
 	up := Multiply(2.0, CreateAxisVector(YAxis))
 	fov := 60.0
-	expected_dir := Multiply(-1.0, CreateAxisVector(ZAxis))
-	expected_up := CreateAxisVector(YAxis)
+	expectedDir := Multiply(-1.0, CreateAxisVector(ZAxis))
+	expectedUp := CreateAxisVector(YAxis)
 
 	camera := CreateCamera(origin, dir, up, fov)
 
@@ -21,12 +21,12 @@ func TestCreateCamera(t *testing.T) {
 			origin, dir, up, fov, origin, camera.Origin)
 	}
 
-	if camera.Direction != expected_dir {
+	if camera.Direction != expectedDir {
 		t.Errorf("CreateCamera(%v, %v, %v, %f) must return camera which direction is normalized, actual direction is %v",
 			origin, dir, up, fov, camera.Direction)
 	}
 
-	if camera.Up != expected_up {
+	if camera.Up != expectedUp {
 		t.Errorf("CreateCamera(%v, %v, %v, %f) must return camera which up is normalized, actual up is %v",
 			origin, dir, up, fov, camera.Up)
 	}

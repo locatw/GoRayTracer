@@ -118,9 +118,9 @@ func main() {
 			},
 		}
 
-	start_time := time.Now()
+	startTime := time.Now()
 	image := Render(scene, width, height)
-	elapsed := time.Since(start_time)
+	elapsed := time.Since(startTime)
 
 	fmt.Printf("%0.3f [s]\n", elapsed.Seconds())
 

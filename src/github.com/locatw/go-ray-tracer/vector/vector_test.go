@@ -73,21 +73,21 @@ func TestVectorSubtract(t *testing.T) {
 
 func TestVectorNormalize(t *testing.T) {
 	v := Vector{X: 1.0, Y: 4.0, Z: 8.0}
-	v_len := v.Length()
+	length := v.Length()
 
 	result := Normalize(v)
 	if result.Length() != 1.0 {
 		t.Errorf("Normalize(%v) must return a Vector which length is 1.0, actual length is %f", v, result.Length())
 	}
 
-	if result.X != v.X/v_len {
-		t.Errorf("X value of %v must %f, actual is %f", result, v.X/v_len, result.X)
+	if result.X != v.X/length {
+		t.Errorf("X value of %v must %f, actual is %f", result, v.X/length, result.X)
 	}
-	if result.Y != v.Y/v_len {
-		t.Errorf("Y value of %v must %f, actual is %f", result, v.Y/v_len, result.Y)
+	if result.Y != v.Y/length {
+		t.Errorf("Y value of %v must %f, actual is %f", result, v.Y/length, result.Y)
 	}
-	if result.Z != v.Z/v_len {
-		t.Errorf("Z value of %v must %f, actual is %f", result, v.Z/v_len, result.Z)
+	if result.Z != v.Z/length {
+		t.Errorf("Z value of %v must %f, actual is %f", result, v.Z/length, result.Z)
 	}
 }
 
