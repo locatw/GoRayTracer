@@ -19,6 +19,7 @@ type RayTracer struct {
 
 type RenderingSetting struct {
 	SamplingCount              int
+	TraceRecursionLimit        int
 	DistanceAttenuationEnabled bool
 }
 
@@ -87,7 +88,7 @@ func (rayTracer *RayTracer) renderPixel(pixel *image.Pixel) {
 
 	pixelColor := image.CreateDefaultColor(image.Black)
 	for _, ray := range camera.CreatePixelRays(pixel.Coordinate.X, pixel.Coordinate.Y, setting.SamplingCount) {
-		color := rayTracer.traceRay(ray, 10)
+		color := rayTracer.traceRay(ray, setting.TraceRecursionLimit)
 
 		pixelColor = image.AddColor(pixelColor, color)
 	}

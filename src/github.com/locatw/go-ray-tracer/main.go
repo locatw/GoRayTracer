@@ -122,6 +122,7 @@ func main() {
 		Scene: scene,
 		RenderingSetting: RenderingSetting{
 			SamplingCount:              1000,
+			TraceRecursionLimit:        10,
 			DistanceAttenuationEnabled: true,
 		},
 	}
