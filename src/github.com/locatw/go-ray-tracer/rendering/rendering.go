@@ -16,19 +16,77 @@ type RayTracer struct {
 	Scene Scene
 }
 
-func (rayTracer *RayTracer) distanceAttenuation(ray Ray, hitInfo *HitInfo, color image.Color) image.Color {
-	v := Subtract(hitInfo.Position, ray.Origin)
-	distance := v.Length()
+func (rayTracer *RayTracer) Render() image.Image {
+	rand.Seed(time.Now().UnixNano())
 
-	return image.DivideScalar(color, 1.0+0.01*math.Pow(distance, 2))
+	camera := rayTracer.Scene.Camera
+
+	img := image.CreateImage(camera.Resolution.Width, camera.Resolution.Height)
+
+	capacity := camera.Resolution.PixelCount()
+	pixelCh := make(chan *image.Pixel, capacity)
+	resultCh := make(chan *image.Pixel, capacity)
+
+	for i := 0; i < runtime.NumCPU(); i++ {
+		go rayTracer.renderPixelRoutine(pixelCh, resultCh)
+	}
+
+	for i := 0; i < len(img.Pixels); i++ {
+		pixelCh <- &img.Pixels[i]
+	}
+
+	fmt.Printf("NumCPU: %d\n", runtime.NumCPU())
+	fmt.Printf("NumGoroutine: %d\n\n", runtime.NumGoroutine())
+
+	progressPrinter := ProgressPrinter{
+		TotalCount: camera.Resolution.PixelCount(),
+		Interval:   5 * camera.Resolution.Width,
+		Count:      0,
+	}
+	finishedPixelCount := 0
+	for {
+		if finishedPixelCount == camera.Resolution.PixelCount() {
+			break
+		}
+
+		<-resultCh
+
+		finishedPixelCount++
+
+		progressPrinter.Print()
+	}
+
+	close(pixelCh)
+	close(resultCh)
+
+	return img
 }
 
-func (rayTracer *RayTracer) reflectance(ray Ray, normal Vector, n1 float64, n2 float64) float64 {
-	// schilick's approximation
-	cosTheta := Dot(Multiply(-1.0, ray.Direction), normal)
-	r := math.Pow((n1-n2)/(n1+n2), 2.0)
+func (rayTracer *RayTracer) renderPixelRoutine(pixelCh <-chan *image.Pixel, resultCh chan<- *image.Pixel) {
+	for {
+		pixel, ok := <-pixelCh
+		if !ok {
+			break
+		}
 
-	return r + (1.0-r)*math.Pow(1.0-cosTheta, 5)
+		rayTracer.renderPixel(pixel)
+
+		resultCh <- pixel
+	}
+}
+
+func (rayTracer *RayTracer) renderPixel(pixel *image.Pixel) {
+	camera := rayTracer.Scene.Camera
+	samplingCount := 1000
+
+	pixelColor := image.CreateDefaultColor(image.Black)
+	for _, ray := range camera.CreatePixelRays(pixel.Coordinate.X, pixel.Coordinate.Y, samplingCount) {
+		color := rayTracer.traceRay(ray, 10)
+
+		pixelColor = image.AddColor(pixelColor, color)
+	}
+
+	pixel.Color = toneMap(image.DivideScalar(pixelColor, float64(samplingCount)))
 }
 
 func (rayTracer *RayTracer) traceRay(ray Ray, depth int) image.Color {
@@ -97,18 +155,19 @@ func (rayTracer *RayTracer) traceRay(ray Ray, depth int) image.Color {
 	return image.AddColorAll(emissionColor, diffuseColor, specularColor, refractionColor)
 }
 
-func (rayTracer *RayTracer) renderPixel(pixel *image.Pixel) {
-	camera := rayTracer.Scene.Camera
-	samplingCount := 1000
+func (rayTracer *RayTracer) distanceAttenuation(ray Ray, hitInfo *HitInfo, color image.Color) image.Color {
+	v := Subtract(hitInfo.Position, ray.Origin)
+	distance := v.Length()
 
-	pixelColor := image.CreateDefaultColor(image.Black)
-	for _, ray := range camera.CreatePixelRays(pixel.Coordinate.X, pixel.Coordinate.Y, samplingCount) {
-		color := rayTracer.traceRay(ray, 10)
+	return image.DivideScalar(color, 1.0+0.01*math.Pow(distance, 2))
+}
 
-		pixelColor = image.AddColor(pixelColor, color)
-	}
+func (rayTracer *RayTracer) reflectance(ray Ray, normal Vector, n1 float64, n2 float64) float64 {
+	// schilick's approximation
+	cosTheta := Dot(Multiply(-1.0, ray.Direction), normal)
+	r := math.Pow((n1-n2)/(n1+n2), 2.0)
 
-	pixel.Color = toneMap(image.DivideScalar(pixelColor, float64(samplingCount)))
+	return r + (1.0-r)*math.Pow(1.0-cosTheta, 5)
 }
 
 func toneMap(color image.Color) image.Color {
@@ -118,63 +177,4 @@ func toneMap(color image.Color) image.Color {
 		G: float32(math.Pow(float64(color.G), e)),
 		B: float32(math.Pow(float64(color.B), e)),
 	}
-}
-
-func (rayTracer *RayTracer) renderPixelRoutine(pixelCh <-chan *image.Pixel, resultCh chan<- *image.Pixel) {
-	for {
-		pixel, ok := <-pixelCh
-		if !ok {
-			break
-		}
-
-		rayTracer.renderPixel(pixel)
-
-		resultCh <- pixel
-	}
-}
-
-func (rayTracer *RayTracer) Render() image.Image {
-	rand.Seed(time.Now().UnixNano())
-
-	camera := rayTracer.Scene.Camera
-
-	img := image.CreateImage(camera.Resolution.Width, camera.Resolution.Height)
-
-	capacity := camera.Resolution.PixelCount()
-	pixelCh := make(chan *image.Pixel, capacity)
-	resultCh := make(chan *image.Pixel, capacity)
-
-	for i := 0; i < runtime.NumCPU(); i++ {
-		go rayTracer.renderPixelRoutine(pixelCh, resultCh)
-	}
-
-	for i := 0; i < len(img.Pixels); i++ {
-		pixelCh <- &img.Pixels[i]
-	}
-
-	fmt.Printf("NumCPU: %d\n", runtime.NumCPU())
-	fmt.Printf("NumGoroutine: %d\n\n", runtime.NumGoroutine())
-
-	progressPrinter := ProgressPrinter{
-		TotalCount: camera.Resolution.PixelCount(),
-		Interval:   5 * camera.Resolution.Width,
-		Count:      0,
-	}
-	finishedPixelCount := 0
-	for {
-		if finishedPixelCount == camera.Resolution.PixelCount() {
-			break
-		}
-
-		<-resultCh
-
-		finishedPixelCount++
-
-		progressPrinter.Print()
-	}
-
-	close(pixelCh)
-	close(resultCh)
-
-	return img
 }
