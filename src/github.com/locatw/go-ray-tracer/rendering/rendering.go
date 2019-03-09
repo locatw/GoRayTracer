@@ -97,7 +97,7 @@ func renderPixel(scene Scene, width int, height int, pixel *image.Pixel) {
 	samplingCount := 1000
 
 	pixelColor := image.CreateDefaultColor(image.Black)
-	for _, ray := range scene.Camera.CreatePixelRays(width, height, pixel.Coordinate, samplingCount) {
+	for _, ray := range scene.Camera.CreatePixelRays(pixel.Coordinate.X, pixel.Coordinate.Y, samplingCount) {
 		color := traceRay(scene, ray, 10)
 
 		pixelColor = image.AddColor(pixelColor, color)
