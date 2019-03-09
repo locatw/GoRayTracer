@@ -6,7 +6,6 @@ import (
 	"github.com/golang/mock/gomock"
 	. "github.com/locatw/go-ray-tracer/element"
 	"github.com/locatw/go-ray-tracer/element/mock"
-	. "github.com/locatw/go-ray-tracer/image"
 	. "github.com/locatw/go-ray-tracer/vector"
 )
 
@@ -15,7 +14,6 @@ func TestLookForIntersectedObject(t *testing.T) {
 		CreateZeroVector(),
 		CreateAxisVector(ZAxis),
 		CreateAxisVector(YAxis),
-		Resolution{Width: 3, Height: 2},
 		60.0,
 	)
 	ray := CreateRay(CreateZeroVector(), CreateAxisVector(ZAxis))

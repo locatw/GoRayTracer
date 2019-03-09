@@ -18,6 +18,7 @@ type RayTracer struct {
 }
 
 type RenderingSetting struct {
+	Resolution                 image.Resolution
 	SamplingCount              int
 	TraceRecursionLimit        int
 	DistanceAttenuationEnabled bool
@@ -28,14 +29,16 @@ func (rayTracer *RayTracer) Render() image.Image {
 
 	camera := rayTracer.Scene.Camera
 
-	img := image.CreateImage(camera.Resolution.Width, camera.Resolution.Height)
+	resolution := rayTracer.RenderingSetting.Resolution
+	screen := camera.CreateScreen(resolution)
+	img := image.CreateImage(resolution.Width, resolution.Height)
 
-	capacity := camera.Resolution.PixelCount()
+	capacity := resolution.PixelCount()
 	pixelCh := make(chan *image.Pixel, capacity)
 	resultCh := make(chan *image.Pixel, capacity)
 
 	for i := 0; i < runtime.NumCPU(); i++ {
-		go rayTracer.renderPixelRoutine(pixelCh, resultCh)
+		go rayTracer.renderPixelRoutine(&screen, pixelCh, resultCh)
 	}
 
 	for i := 0; i < len(img.Pixels); i++ {
@@ -46,13 +49,13 @@ func (rayTracer *RayTracer) Render() image.Image {
 	fmt.Printf("NumGoroutine: %d\n\n", runtime.NumGoroutine())
 
 	progressPrinter := ProgressPrinter{
-		TotalCount: camera.Resolution.PixelCount(),
-		Interval:   5 * camera.Resolution.Width,
+		TotalCount: resolution.PixelCount(),
+		Interval:   5 * resolution.Width,
 		Count:      0,
 	}
 	finishedPixelCount := 0
 	for {
-		if finishedPixelCount == camera.Resolution.PixelCount() {
+		if finishedPixelCount == resolution.PixelCount() {
 			break
 		}
 
@@ -69,25 +72,25 @@ func (rayTracer *RayTracer) Render() image.Image {
 	return img
 }
 
-func (rayTracer *RayTracer) renderPixelRoutine(pixelCh <-chan *image.Pixel, resultCh chan<- *image.Pixel) {
+func (rayTracer *RayTracer) renderPixelRoutine(screen *Screen, pixelCh <-chan *image.Pixel, resultCh chan<- *image.Pixel) {
 	for {
 		pixel, ok := <-pixelCh
 		if !ok {
 			break
 		}
 
-		rayTracer.renderPixel(pixel)
+		rayTracer.renderPixel(screen, pixel)
 
 		resultCh <- pixel
 	}
 }
 
-func (rayTracer *RayTracer) renderPixel(pixel *image.Pixel) {
+func (rayTracer *RayTracer) renderPixel(screen *Screen, pixel *image.Pixel) {
 	camera := rayTracer.Scene.Camera
 	setting := rayTracer.RenderingSetting
 
 	pixelColor := image.CreateDefaultColor(image.Black)
-	for _, ray := range camera.CreatePixelRays(pixel.Coordinate.X, pixel.Coordinate.Y, setting.SamplingCount) {
+	for _, ray := range screen.CreatePixelRays(&camera, pixel.Coordinate.X, pixel.Coordinate.Y, setting.SamplingCount) {
 		color := rayTracer.traceRay(ray, setting.TraceRecursionLimit)
 
 		pixelColor = image.AddColor(pixelColor, color)

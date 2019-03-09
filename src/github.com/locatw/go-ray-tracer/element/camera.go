@@ -10,28 +10,22 @@ import (
 
 type Camera struct {
 	Origin, Direction, Up Vector
-	Resolution            Resolution
 	Fov                   float64
-	screen                screen
 }
 
-func CreateCamera(origin Vector, direction Vector, up Vector, resolution Resolution, fov float64) Camera {
+func CreateCamera(origin Vector, direction Vector, up Vector, fov float64) Camera {
 	correctedDir := Normalize(direction)
 	correctedUp := Normalize(Cross(direction, Cross(up, direction)))
-	screen := createScreen(resolution, origin, correctedDir, correctedUp, fov)
 
 	return Camera{
-		Origin:     origin,
-		Direction:  correctedDir,
-		Up:         correctedUp,
-		Resolution: resolution,
-		Fov:        fov,
-		screen:     screen,
+		Origin:    origin,
+		Direction: correctedDir,
+		Up:        correctedUp,
+		Fov:       fov,
 	}
 }
 
-func (camera *Camera) CreatePixelRays(x int, y int, samplingCount int) []Ray {
-	screen := camera.screen
+func (screen *Screen) CreatePixelRays(camera *Camera, x int, y int, samplingCount int) []Ray {
 	pixel := screen.createPixel(x, y)
 
 	rays := make([]Ray, samplingCount)
@@ -39,14 +33,14 @@ func (camera *Camera) CreatePixelRays(x int, y int, samplingCount int) []Ray {
 		x := rand.Float64() - 0.5
 		y := rand.Float64() - 0.5
 
-		subPixelPos := pixel.calculateSubPixelPosition(&screen, x, y)
+		subPixelPos := pixel.calculateSubPixelPosition(screen, x, y)
 		rays[i] = CreateRay(camera.Origin, Subtract(subPixelPos, camera.Origin))
 	}
 
 	return rays
 }
 
-type screen struct {
+type Screen struct {
 	Center     Vector
 	XAxis      Vector
 	YAxis      Vector
@@ -61,16 +55,16 @@ type pixel struct {
 	Height float64
 }
 
-func createScreen(resolution Resolution, cameraCenter Vector, cameraDirection Vector, cameraUp Vector, fov float64) screen {
+func (camera *Camera) CreateScreen(resolution Resolution) Screen {
 	aspect := resolution.Aspect()
 
-	center := Add(cameraCenter, cameraDirection)
-	xAxis := Normalize(Cross(cameraDirection, cameraUp))
-	yAxis := Multiply(-1.0, cameraUp)
-	height := 2.0 * math.Tan(fov/2.0)
+	center := Add(camera.Origin, camera.Direction)
+	xAxis := Normalize(Cross(camera.Direction, camera.Up))
+	yAxis := Multiply(-1.0, camera.Up)
+	height := 2.0 * math.Tan(camera.Fov/2.0)
 	width := height * aspect
 
-	return screen{
+	return Screen{
 		Center:     center,
 		XAxis:      xAxis,
 		YAxis:      yAxis,
@@ -80,7 +74,7 @@ func createScreen(resolution Resolution, cameraCenter Vector, cameraDirection Ve
 	}
 }
 
-func (screen *screen) createPixel(x int, y int) pixel {
+func (screen *Screen) createPixel(x int, y int) pixel {
 	leftTopPixel := screen.createLeftTopPixel()
 
 	center := Add(leftTopPixel.Center, Multiply(float64(x)*leftTopPixel.Width, screen.XAxis))
@@ -89,7 +83,7 @@ func (screen *screen) createPixel(x int, y int) pixel {
 	return pixel{Center: center, Width: leftTopPixel.Width, Height: leftTopPixel.Height}
 }
 
-func (screen *screen) createLeftTopPixel() pixel {
+func (screen *Screen) createLeftTopPixel() pixel {
 	pixelWidth := screen.Width / float64(screen.Resolution.Width)
 	pixelHeight := screen.Height / float64(screen.Resolution.Height)
 
@@ -103,6 +97,6 @@ func (screen *screen) createLeftTopPixel() pixel {
 	return pixel{Center: center, Width: pixelWidth, Height: pixelHeight}
 }
 
-func (pixel *pixel) calculateSubPixelPosition(screen *screen, x float64, y float64) Vector {
+func (pixel *pixel) calculateSubPixelPosition(screen *Screen, x float64, y float64) Vector {
 	return AddAll(pixel.Center, Multiply(x*pixel.Width, screen.XAxis), Multiply(y*pixel.Height, screen.YAxis))
 }
