@@ -12,14 +12,18 @@ import (
 	. "github.com/locatw/go-ray-tracer/vector"
 )
 
-func distanceAttenuation(ray Ray, hitInfo *HitInfo, color image.Color) image.Color {
+type RayTracer struct {
+	Scene Scene
+}
+
+func (rayTracer *RayTracer) distanceAttenuation(ray Ray, hitInfo *HitInfo, color image.Color) image.Color {
 	v := Subtract(hitInfo.Position, ray.Origin)
 	distance := v.Length()
 
 	return image.DivideScalar(color, 1.0+0.01*math.Pow(distance, 2))
 }
 
-func reflectance(ray Ray, normal Vector, n1 float64, n2 float64) float64 {
+func (rayTracer *RayTracer) reflectance(ray Ray, normal Vector, n1 float64, n2 float64) float64 {
 	// schilick's approximation
 	cosTheta := Dot(Multiply(-1.0, ray.Direction), normal)
 	r := math.Pow((n1-n2)/(n1+n2), 2.0)
@@ -27,12 +31,12 @@ func reflectance(ray Ray, normal Vector, n1 float64, n2 float64) float64 {
 	return r + (1.0-r)*math.Pow(1.0-cosTheta, 5)
 }
 
-func traceRay(scene Scene, ray Ray, depth int) image.Color {
+func (rayTracer *RayTracer) traceRay(ray Ray, depth int) image.Color {
 	if depth <= 0 {
 		return image.CreateDefaultColor(image.Black)
 	}
 
-	hitInfo := scene.LookForIntersectedObject(ray)
+	hitInfo := rayTracer.Scene.LookForIntersectedObject(ray)
 
 	if hitInfo == nil {
 		return image.CreateDefaultColor(image.Black)
@@ -44,15 +48,15 @@ func traceRay(scene Scene, ray Ray, depth int) image.Color {
 	if !material.Emission.NearlyEqual(emissionColor) {
 		emissionColor =
 			image.MultiplyScalar(Dot(Multiply(-1.0, ray.Direction), hitInfo.Normal), material.Emission)
-		emissionColor = distanceAttenuation(ray, hitInfo, emissionColor)
+		emissionColor = rayTracer.distanceAttenuation(ray, hitInfo, emissionColor)
 	}
 
 	diffuseColor := image.CreateDefaultColor(image.Black)
 	if !material.Diffuse.NearlyEqual(diffuseColor) {
 		diffuseRay := CreateDiffuseRay(ray, hitInfo)
-		diffuseColor = traceRay(scene, diffuseRay, depth-1)
+		diffuseColor = rayTracer.traceRay(diffuseRay, depth-1)
 		diffuseColor = image.MultiplyColor(material.Diffuse, diffuseColor)
-		diffuseColor = distanceAttenuation(ray, hitInfo, diffuseColor)
+		diffuseColor = rayTracer.distanceAttenuation(ray, hitInfo, diffuseColor)
 	}
 
 	refractionColor := image.CreateDefaultColor(image.Black)
@@ -67,11 +71,11 @@ func traceRay(scene Scene, ray Ray, depth int) image.Color {
 				normal = Multiply(-1.0, hitInfo.Normal)
 			}
 
-			kr := reflectance(ray, normal, 1.0, *material.IndexOfRefraction)
+			kr := rayTracer.reflectance(ray, normal, 1.0, *material.IndexOfRefraction)
 
 			if kr < rand.Float64() {
-				refractionColor = traceRay(scene, refractRay, depth-1)
-				refractionColor = distanceAttenuation(ray, hitInfo, refractionColor)
+				refractionColor = rayTracer.traceRay(refractRay, depth-1)
+				refractionColor = rayTracer.distanceAttenuation(ray, hitInfo, refractionColor)
 			} else {
 				refracted = false
 			}
@@ -85,20 +89,21 @@ func traceRay(scene Scene, ray Ray, depth int) image.Color {
 	specularColor := image.CreateDefaultColor(image.Black)
 	if !refracted && !material.Specular.NearlyEqual(specularColor) {
 		reflectRay := CreateReflectRay(ray, hitInfo)
-		specularColor = traceRay(scene, reflectRay, depth-1)
+		specularColor = rayTracer.traceRay(reflectRay, depth-1)
 		specularColor = image.MultiplyColor(material.Specular, specularColor)
-		specularColor = distanceAttenuation(ray, hitInfo, specularColor)
+		specularColor = rayTracer.distanceAttenuation(ray, hitInfo, specularColor)
 	}
 
 	return image.AddColorAll(emissionColor, diffuseColor, specularColor, refractionColor)
 }
 
-func renderPixel(scene Scene, pixel *image.Pixel) {
+func (rayTracer *RayTracer) renderPixel(pixel *image.Pixel) {
+	camera := rayTracer.Scene.Camera
 	samplingCount := 1000
 
 	pixelColor := image.CreateDefaultColor(image.Black)
-	for _, ray := range scene.Camera.CreatePixelRays(pixel.Coordinate.X, pixel.Coordinate.Y, samplingCount) {
-		color := traceRay(scene, ray, 10)
+	for _, ray := range camera.CreatePixelRays(pixel.Coordinate.X, pixel.Coordinate.Y, samplingCount) {
+		color := rayTracer.traceRay(ray, 10)
 
 		pixelColor = image.AddColor(pixelColor, color)
 	}
@@ -115,23 +120,23 @@ func toneMap(color image.Color) image.Color {
 	}
 }
 
-func renderPixelRoutine(pixelCh <-chan *image.Pixel, resultCh chan<- *image.Pixel, scene Scene) {
+func (rayTracer *RayTracer) renderPixelRoutine(pixelCh <-chan *image.Pixel, resultCh chan<- *image.Pixel) {
 	for {
 		pixel, ok := <-pixelCh
 		if !ok {
 			break
 		}
 
-		renderPixel(scene, pixel)
+		rayTracer.renderPixel(pixel)
 
 		resultCh <- pixel
 	}
 }
 
-func Render(scene Scene) image.Image {
+func (rayTracer *RayTracer) Render() image.Image {
 	rand.Seed(time.Now().UnixNano())
 
-	camera := scene.Camera
+	camera := rayTracer.Scene.Camera
 
 	img := image.CreateImage(camera.Resolution.Width, camera.Resolution.Height)
 
@@ -140,7 +145,7 @@ func Render(scene Scene) image.Image {
 	resultCh := make(chan *image.Pixel, capacity)
 
 	for i := 0; i < runtime.NumCPU(); i++ {
-		go renderPixelRoutine(pixelCh, resultCh, scene)
+		go rayTracer.renderPixelRoutine(pixelCh, resultCh)
 	}
 
 	for i := 0; i < len(img.Pixels); i++ {

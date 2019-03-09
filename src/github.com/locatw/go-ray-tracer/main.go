@@ -118,9 +118,10 @@ func main() {
 				},
 			},
 		}
+	rayTracer := RayTracer{Scene: scene}
 
 	startTime := time.Now()
-	image := Render(scene)
+	image := rayTracer.Render()
 	elapsed := time.Since(startTime)
 
 	fmt.Printf("%0.3f [s]\n", elapsed.Seconds())
