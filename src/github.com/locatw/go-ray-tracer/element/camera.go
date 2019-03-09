@@ -12,11 +12,13 @@ type Camera struct {
 	Origin, Direction, Up Vector
 	Resolution            Resolution
 	Fov                   float64
+	screen                screen
 }
 
 func CreateCamera(origin Vector, direction Vector, up Vector, resolution Resolution, fov float64) Camera {
 	correctedDir := Normalize(direction)
 	correctedUp := Normalize(Cross(direction, Cross(up, direction)))
+	screen := createScreen(resolution, origin, correctedDir, correctedUp, fov)
 
 	return Camera{
 		Origin:     origin,
@@ -24,39 +26,83 @@ func CreateCamera(origin Vector, direction Vector, up Vector, resolution Resolut
 		Up:         correctedUp,
 		Resolution: resolution,
 		Fov:        fov,
+		screen:     screen,
 	}
 }
 
 func (camera *Camera) CreatePixelRays(x int, y int, samplingCount int) []Ray {
-	aspect := camera.Resolution.Aspect()
-
-	screenXAxis := Normalize(Cross(camera.Direction, camera.Up))
-	screenYAxis := Multiply(-1.0, camera.Up)
-	screenHeight := 2.0 * math.Tan(camera.Fov/2.0)
-	screenWidth := screenHeight * aspect
-
-	screenCenter := Add(camera.Origin, camera.Direction)
-
-	pixelWidth := screenWidth / float64(camera.Resolution.Width)
-	pixelHeight := screenHeight / float64(camera.Resolution.Height)
-	offset := Multiply(pixelWidth/2.0, screenXAxis)
-	offset = Add(offset, Multiply(pixelHeight/2.0, screenYAxis))
-
-	leftTopPixelCenter := Subtract(screenCenter, Multiply(screenWidth/2.0, screenXAxis))
-	leftTopPixelCenter = Subtract(leftTopPixelCenter, Multiply(screenHeight/2.0, screenYAxis))
-	leftTopPixelCenter = Add(leftTopPixelCenter, offset)
-
-	pixelCenter := Add(leftTopPixelCenter, Multiply(float64(x)*pixelWidth, screenXAxis))
-	pixelCenter = Add(pixelCenter, Multiply(float64(y)*pixelHeight, screenYAxis))
+	screen := camera.screen
+	pixel := screen.createPixel(x, y)
 
 	rays := make([]Ray, samplingCount)
 	for i := 0; i < samplingCount; i++ {
 		x := rand.Float64() - 0.5
 		y := rand.Float64() - 0.5
 
-		subPixelPos := AddAll(pixelCenter, Multiply(x*pixelWidth, screenXAxis), Multiply(y*pixelHeight, screenYAxis))
+		subPixelPos := pixel.calculateSubPixelPosition(&screen, x, y)
 		rays[i] = CreateRay(camera.Origin, Subtract(subPixelPos, camera.Origin))
 	}
 
 	return rays
+}
+
+type screen struct {
+	Center     Vector
+	XAxis      Vector
+	YAxis      Vector
+	Resolution Resolution
+	Width      float64
+	Height     float64
+}
+
+type pixel struct {
+	Center Vector
+	Width  float64
+	Height float64
+}
+
+func createScreen(resolution Resolution, cameraCenter Vector, cameraDirection Vector, cameraUp Vector, fov float64) screen {
+	aspect := resolution.Aspect()
+
+	center := Add(cameraCenter, cameraDirection)
+	xAxis := Normalize(Cross(cameraDirection, cameraUp))
+	yAxis := Multiply(-1.0, cameraUp)
+	height := 2.0 * math.Tan(fov/2.0)
+	width := height * aspect
+
+	return screen{
+		Center:     center,
+		XAxis:      xAxis,
+		YAxis:      yAxis,
+		Resolution: resolution,
+		Width:      width,
+		Height:     height,
+	}
+}
+
+func (screen *screen) createPixel(x int, y int) pixel {
+	leftTopPixel := screen.createLeftTopPixel()
+
+	center := Add(leftTopPixel.Center, Multiply(float64(x)*leftTopPixel.Width, screen.XAxis))
+	center = Add(center, Multiply(float64(y)*leftTopPixel.Height, screen.YAxis))
+
+	return pixel{Center: center, Width: leftTopPixel.Width, Height: leftTopPixel.Height}
+}
+
+func (screen *screen) createLeftTopPixel() pixel {
+	pixelWidth := screen.Width / float64(screen.Resolution.Width)
+	pixelHeight := screen.Height / float64(screen.Resolution.Height)
+
+	offset := Multiply(pixelWidth/2.0, screen.XAxis)
+	offset = Add(offset, Multiply(pixelHeight/2.0, screen.YAxis))
+
+	center := Subtract(screen.Center, Multiply(screen.Width/2.0, screen.XAxis))
+	center = Subtract(center, Multiply(screen.Height/2.0, screen.YAxis))
+	center = Add(center, offset)
+
+	return pixel{Center: center, Width: pixelWidth, Height: pixelHeight}
+}
+
+func (pixel *pixel) calculateSubPixelPosition(screen *screen, x float64, y float64) Vector {
+	return AddAll(pixel.Center, Multiply(x*pixel.Width, screen.XAxis), Multiply(y*pixel.Height, screen.YAxis))
 }
