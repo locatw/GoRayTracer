@@ -241,7 +241,7 @@ func Render(scene Scene, width int, height int) image.Image {
 
 		index := coordResult.Coordinate.Y*img.Width + coordResult.Coordinate.X
 		img.Data[index] = coordResult.Color
-		finishedPixelCount += 1
+		finishedPixelCount++
 
 		progressPrinter.Print()
 	}

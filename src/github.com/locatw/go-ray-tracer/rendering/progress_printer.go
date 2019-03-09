@@ -9,7 +9,7 @@ type ProgressPrinter struct {
 }
 
 func (printer *ProgressPrinter) Print() {
-	printer.Count += 1
+	printer.Count++
 
 	if printer.Count%printer.Interval == 0 {
 		progress := float64(printer.Count) / float64(printer.TotalCount) * 100.0
