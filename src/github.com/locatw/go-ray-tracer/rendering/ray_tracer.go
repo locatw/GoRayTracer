@@ -30,7 +30,7 @@ func (rayTracer *RayTracer) Render() image.Image {
 	camera := rayTracer.Scene.Camera
 
 	resolution := rayTracer.RenderingSetting.Resolution
-	screen := camera.CreateScreen(resolution)
+	screen := CreateScreen(&camera, resolution)
 	img := image.CreateImage(resolution.Width, resolution.Height)
 
 	capacity := resolution.PixelCount()
