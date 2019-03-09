@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	mathex "../math"
+	mathex "github.com/locatw/go-ray-tracer/math"
 )
 
 type Axis int

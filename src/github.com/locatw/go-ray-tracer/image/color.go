@@ -3,7 +3,7 @@ package image
 import (
 	"fmt"
 
-	mathex "../math"
+	mathex "github.com/locatw/go-ray-tracer/math"
 )
 
 type Color struct {

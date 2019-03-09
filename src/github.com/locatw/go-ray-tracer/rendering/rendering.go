@@ -7,9 +7,9 @@ import (
 	"runtime"
 	"time"
 
-	. "../element"
-	"../image"
-	. "../vector"
+	. "github.com/locatw/go-ray-tracer/element"
+	"github.com/locatw/go-ray-tracer/image"
+	. "github.com/locatw/go-ray-tracer/vector"
 )
 
 type Coordinate struct {

@@ -3,7 +3,7 @@ package element
 import (
 	"math"
 
-	. "../vector"
+	. "github.com/locatw/go-ray-tracer/vector"
 )
 
 type Sphere struct {

@@ -3,8 +3,8 @@ package element
 import (
 	"testing"
 
-	mathex "../math"
-	. "../vector"
+	mathex "github.com/locatw/go-ray-tracer/math"
+	. "github.com/locatw/go-ray-tracer/vector"
 )
 
 var epsilon float64 = mathex.Epsilon()

@@ -9,7 +9,7 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/src",
+            "program": "${workspaceFolder}/src/github.com/locatw/go-ray-tracer",
             "env": {},
             "args": [],
         }

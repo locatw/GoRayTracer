@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	".."
-	"../../math"
+	"github.com/locatw/go-ray-tracer/image"
+	"github.com/locatw/go-ray-tracer/math"
 )
 
 // Convert a float value in range [0.0, 1.0] to a integer value in range [0, 255],

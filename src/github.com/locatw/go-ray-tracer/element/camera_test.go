@@ -3,7 +3,7 @@ package element
 import (
 	"testing"
 
-	. "../vector"
+	. "github.com/locatw/go-ray-tracer/vector"
 )
 
 func TestCreateCamera(t *testing.T) {

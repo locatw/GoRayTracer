@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	".."
+	"github.com/locatw/go-ray-tracer/image"
 )
 
 func TestWritePpm(t *testing.T) {

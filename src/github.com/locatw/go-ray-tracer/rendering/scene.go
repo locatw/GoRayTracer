@@ -1,6 +1,6 @@
 package rendering
 
-import . "../element"
+import . "github.com/locatw/go-ray-tracer/element"
 
 type Scene struct {
 	Camera Camera

@@ -1,6 +1,6 @@
 package element
 
-import . "../image"
+import . "github.com/locatw/go-ray-tracer/image"
 
 type Material struct {
 	Emission          Color

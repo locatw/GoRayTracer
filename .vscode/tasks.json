@@ -8,7 +8,7 @@
             "type": "shell",
             "command": "go",
             "args": [
-                "build", "-o", ".go/bin/go_raytracer.exe", "src/main.go"
+                "build", "-o", ".go/bin/go_raytracer.exe", "src/github.com/locatw/go-ray-tracer/main.go"
             ],
             "group": {
                 "kind": "build",

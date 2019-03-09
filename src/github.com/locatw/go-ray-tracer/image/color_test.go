@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 
-	mathex "../math"
+	mathex "github.com/locatw/go-ray-tracer/math"
 )
 
 var epsilon float32 = mathex.Epsilon32()

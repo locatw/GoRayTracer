@@ -1,6 +1,6 @@
 package element
 
-import . "../vector"
+import . "github.com/locatw/go-ray-tracer/vector"
 
 type Camera struct {
 	Origin, Direction, Up Vector

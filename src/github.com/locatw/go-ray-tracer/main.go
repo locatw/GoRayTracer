@@ -5,12 +5,12 @@ import (
 	"os"
 	"time"
 
-	. "./element"
-	. "./image"
-	"./image/pnm"
-	mathex "./math"
-	. "./rendering"
-	. "./vector"
+	. "github.com/locatw/go-ray-tracer/element"
+	. "github.com/locatw/go-ray-tracer/image"
+	"github.com/locatw/go-ray-tracer/image/pnm"
+	mathex "github.com/locatw/go-ray-tracer/math"
+	. "github.com/locatw/go-ray-tracer/rendering"
+	. "github.com/locatw/go-ray-tracer/vector"
 )
 
 func main() {

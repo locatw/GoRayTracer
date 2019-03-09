@@ -1,6 +1,6 @@
 package element
 
-import . "../vector"
+import . "github.com/locatw/go-ray-tracer/vector"
 
 type Plane struct {
 	Center   Vector
