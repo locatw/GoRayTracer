@@ -37,7 +37,7 @@ func reflectance(ray Ray, normal Vector, n1 float64, n2 float64) float64 {
 }
 
 func lookForIntersectedObject(scene Scene, ray Ray) *HitInfo {
-	var minHitInfo *HitInfo = nil
+	var minHitInfo *HitInfo
 
 	for _, shape := range scene.Shapes {
 		hitInfo := shape.Intersect(ray)
