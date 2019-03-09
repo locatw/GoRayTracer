@@ -36,34 +36,12 @@ func reflectance(ray Ray, normal Vector, n1 float64, n2 float64) float64 {
 	return r + (1.0-r)*math.Pow(1.0-cosTheta, 5)
 }
 
-func lookForIntersectedObject(scene Scene, ray Ray) *HitInfo {
-	var minHitInfo *HitInfo
-
-	for _, shape := range scene.Shapes {
-		hitInfo := shape.Intersect(ray)
-
-		if hitInfo == nil {
-			continue
-		}
-
-		if minHitInfo == nil {
-			minHitInfo = hitInfo
-		} else {
-			if hitInfo.T < minHitInfo.T {
-				minHitInfo = hitInfo
-			}
-		}
-	}
-
-	return minHitInfo
-}
-
 func traceRay(scene Scene, ray Ray, depth int) image.Color {
 	if depth <= 0 {
 		return image.CreateDefaultColor(image.Black)
 	}
 
-	hitInfo := lookForIntersectedObject(scene, ray)
+	hitInfo := scene.LookForIntersectedObject(ray)
 
 	if hitInfo == nil {
 		return image.CreateDefaultColor(image.Black)
