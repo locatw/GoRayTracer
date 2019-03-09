@@ -93,7 +93,7 @@ func traceRay(scene Scene, ray Ray, depth int) image.Color {
 	return image.AddColorAll(emissionColor, diffuseColor, specularColor, refractionColor)
 }
 
-func renderPixel(scene Scene, width int, height int, pixel *image.Pixel) {
+func renderPixel(scene Scene, pixel *image.Pixel) {
 	samplingCount := 1000
 
 	pixelColor := image.CreateDefaultColor(image.Black)
@@ -115,29 +115,32 @@ func toneMap(color image.Color) image.Color {
 	}
 }
 
-func renderPixelRoutine(pixelCh <-chan *image.Pixel, resultCh chan<- *image.Pixel, scene Scene, width int, height int) {
+func renderPixelRoutine(pixelCh <-chan *image.Pixel, resultCh chan<- *image.Pixel, scene Scene) {
 	for {
 		pixel, ok := <-pixelCh
 		if !ok {
 			break
 		}
 
-		renderPixel(scene, width, height, pixel)
+		renderPixel(scene, pixel)
 
 		resultCh <- pixel
 	}
 }
 
-func Render(scene Scene, width int, height int) image.Image {
+func Render(scene Scene) image.Image {
 	rand.Seed(time.Now().UnixNano())
 
-	img := image.CreateImage(width, height)
+	camera := scene.Camera
 
-	pixelCh := make(chan *image.Pixel, width*height)
-	resultCh := make(chan *image.Pixel, width*height)
+	img := image.CreateImage(camera.Resolution.Width, camera.Resolution.Height)
+
+	capacity := camera.Resolution.PixelCount()
+	pixelCh := make(chan *image.Pixel, capacity)
+	resultCh := make(chan *image.Pixel, capacity)
 
 	for i := 0; i < runtime.NumCPU(); i++ {
-		go renderPixelRoutine(pixelCh, resultCh, scene, width, height)
+		go renderPixelRoutine(pixelCh, resultCh, scene)
 	}
 
 	for i := 0; i < len(img.Pixels); i++ {
@@ -147,10 +150,14 @@ func Render(scene Scene, width int, height int) image.Image {
 	fmt.Printf("NumCPU: %d\n", runtime.NumCPU())
 	fmt.Printf("NumGoroutine: %d\n\n", runtime.NumGoroutine())
 
-	progressPrinter := ProgressPrinter{TotalCount: width * height, Interval: 5 * width, Count: 0}
+	progressPrinter := ProgressPrinter{
+		TotalCount: camera.Resolution.PixelCount(),
+		Interval:   5 * camera.Resolution.Width,
+		Count:      0,
+	}
 	finishedPixelCount := 0
 	for {
-		if finishedPixelCount == width*height {
+		if finishedPixelCount == camera.Resolution.PixelCount() {
 			break
 		}
 

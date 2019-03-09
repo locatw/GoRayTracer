@@ -120,7 +120,7 @@ func main() {
 		}
 
 	startTime := time.Now()
-	image := Render(scene, width, height)
+	image := Render(scene)
 	elapsed := time.Since(startTime)
 
 	fmt.Printf("%0.3f [s]\n", elapsed.Seconds())
