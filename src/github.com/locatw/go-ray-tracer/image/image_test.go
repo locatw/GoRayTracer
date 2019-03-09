@@ -19,15 +19,15 @@ func TestCreateImage(t *testing.T) {
 	}
 
 	expectedLength := width * height
-	if len(image.Data) != expectedLength {
+	if len(image.Pixels) != expectedLength {
 		t.Errorf("CreateImage(%d, %d) must return an image with length of Data is %d, actual length is %d",
-			width, height, expectedLength, len(image.Data))
+			width, height, expectedLength, len(image.Pixels))
 	}
 
 	black := CreateDefaultColor(Black)
 	isAllPixelBlack := true
-	for _, data := range image.Data {
-		if data != black {
+	for _, pixel := range image.Pixels {
+		if pixel.Color != black {
 			isAllPixelBlack = false
 			break
 		}

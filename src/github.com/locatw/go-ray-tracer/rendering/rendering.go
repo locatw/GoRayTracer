@@ -218,7 +218,11 @@ func Render(scene Scene, width int, height int) image.Image {
 		coordResult := <-resultCh
 
 		index := coordResult.Coordinate.Y*img.Width + coordResult.Coordinate.X
-		img.Data[index] = coordResult.Color
+		img.Pixels[index] = image.Pixel{
+			X:     coordResult.Coordinate.X,
+			Y:     coordResult.Coordinate.Y,
+			Color: coordResult.Color,
+		}
 		finishedPixelCount++
 
 		progressPrinter.Print()

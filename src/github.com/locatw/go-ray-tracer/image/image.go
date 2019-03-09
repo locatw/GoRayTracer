@@ -1,21 +1,27 @@
 package image
 
+type Pixel struct {
+	X     int
+	Y     int
+	Color Color
+}
+
 type Image struct {
 	Width  int
 	Height int
-	Data   []Color
+	Pixels []Pixel
 }
 
 func CreateImage(width int, height int) Image {
-	data := make([]Color, width*height)
+	pixels := make([]Pixel, width*height)
 
 	black := CreateDefaultColor(Black)
 
-	for h := 0; h < height; h++ {
-		for w := 0; w < width; w++ {
-			data[h*width+w] = black
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			pixels[y*width+x] = Pixel{X: x, Y: y, Color: black}
 		}
 	}
 
-	return Image{Width: width, Height: height, Data: data}
+	return Image{Width: width, Height: height, Pixels: pixels}
 }

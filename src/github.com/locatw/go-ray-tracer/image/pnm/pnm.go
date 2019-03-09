@@ -46,15 +46,15 @@ func WritePpm(path string, image image.Image) error {
 	for h := 0; h < image.Height; h++ {
 		startIndex := h * image.Width
 		endIndex := (h + 1) * image.Width
-		row := image.Data[startIndex:endIndex]
+		row := image.Pixels[startIndex:endIndex]
 
 		rowValues := make([]string, len(row)*3)
-		for i, p := range row {
+		for i, pixel := range row {
 			index := i * 3
 
-			rowValues[index+0] = processPixelValue(p.R)
-			rowValues[index+1] = processPixelValue(p.G)
-			rowValues[index+2] = processPixelValue(p.B)
+			rowValues[index+0] = processPixelValue(pixel.Color.R)
+			rowValues[index+1] = processPixelValue(pixel.Color.G)
+			rowValues[index+2] = processPixelValue(pixel.Color.B)
 		}
 
 		line := strings.Join(rowValues, " ") + "\n"
