@@ -24,14 +24,14 @@ func CreateRay(origin Vector, direction Vector) Ray {
 	return Ray{Origin: origin, Direction: Normalize(direction)}
 }
 
-func CreateDiffuseRay(ray Ray, hitInfo *HitInfo) Ray {
+func CreateDiffuseRay(rnd *rand.Rand, ray Ray, hitInfo *HitInfo) Ray {
 	// base vectors in tangent space
 	u := Normalize(Cross(hitInfo.Normal, ray.Direction))
 	v := Normalize(Cross(u, hitInfo.Normal))
 	n := hitInfo.Normal
 
-	r := math.Sqrt(rand.Float64())
-	theta := 2.0 * math.Pi * rand.Float64()
+	r := math.Sqrt(rnd.Float64())
+	theta := 2.0 * math.Pi * rnd.Float64()
 	x := r * math.Cos(theta)
 	y := r * math.Sin(theta)
 	z := math.Sqrt(math.Max(0.0, 1.0-x*x-y*y))

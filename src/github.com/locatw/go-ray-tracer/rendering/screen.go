@@ -2,7 +2,6 @@ package rendering
 
 import (
 	"math"
-	"math/rand"
 
 	. "github.com/locatw/go-ray-tracer/element"
 	. "github.com/locatw/go-ray-tracer/image"
@@ -37,13 +36,13 @@ func CreateScreen(camera *Camera, resolution Resolution) Screen {
 	}
 }
 
-func (screen *Screen) CreatePixelRays(camera *Camera, x int, y int, samplingCount int) []Ray {
+func (screen *Screen) CreatePixelRays(context renderingContext, camera *Camera, x int, y int, samplingCount int) []Ray {
 	pixel := screen.createPixel(x, y)
 
 	rays := make([]Ray, samplingCount)
 	for i := 0; i < samplingCount; i++ {
-		x := rand.Float64() - 0.5
-		y := rand.Float64() - 0.5
+		x := context.Random.Float64() - 0.5
+		y := context.Random.Float64() - 0.5
 
 		subPixelPos := pixel.calculateSubPixelPosition(screen, x, y)
 		rays[i] = CreateRay(camera.Origin, Subtract(subPixelPos, camera.Origin))
